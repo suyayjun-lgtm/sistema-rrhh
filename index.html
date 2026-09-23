@@ -42,7 +42,7 @@
                     getConfig: function() { this._callApi('getConfig'); },
                     registrarAsistenciaQR: function(qr) { this._callApi('registrarAsistenciaQR', { qr: qr }); },
                     obtenerTareoHoy: function() { this._callApi('obtenerTareoHoy'); },
-                    obtenerMiTareoMensual: function(dni, offset) { this._callApi('obtenerMiTareoMensual', { dni: offset }); },
+                    obtenerMiTareoMensual: function(dni, offset) { this._callApi('obtenerMiTareoMensual', { dni: dni, offset: offset }); },
                     registrarEmpleado: function(data) { this._callApi('registrarEmpleado', { data: data }); },
                     actualizarEstadoManual: function(dni, estado) { this._callApi('actualizarEstadoManual', { dni: dni, estado: estado }); },
                     obtenerReporteMensual: function() { this._callApi('obtenerReporteMensual'); },
@@ -53,7 +53,24 @@
             }
         };
 
+        // Lógica de Bloqueo desde GitHub con CACHÉ OPTIMIZADO (Súper Rápido)
         function verificarAcceso(callback) {
+            var cacheKey = 'licencia_masdigital_estado';
+            var cacheTimeKey = 'licencia_masdigital_time';
+            var now = new Date().getTime();
+            var tiempoExpiracion = 10 * 60 * 1000; // 10 minutos de caché
+            
+            var cached = localStorage.getItem(cacheKey);
+            var cachedTime = localStorage.getItem(cacheTimeKey);
+
+            // Si hay caché válido, cargar al instante sin bloquear la pantalla
+            if (cached && cachedTime && (now - cachedTime < tiempoExpiracion)) {
+                var licenciaCacheada = JSON.parse(cached);
+                ejecutarAccionLicencia(licenciaCacheada);
+                if(callback) callback();
+                return;
+            }
+
             document.getElementById('loader-text').innerText = "Verificando licencia...";
             document.getElementById('loader-overlay').classList.remove('hidden');
             document.getElementById('loader-overlay').classList.add('flex');
@@ -63,37 +80,13 @@
                     document.getElementById('loader-overlay').classList.add('hidden');
                     document.getElementById('loader-overlay').classList.remove('flex');
                     
-                    if (licencia && licencia.estado === 'SUSPENDIDO') {
-                        document.body.innerHTML = `
-                        <div style="font-family: 'Inter', sans-serif; text-align:center; padding:40px 20px; background-color:#0f172a; color:white; height:100vh; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                            <div style="background:#1e293b; padding:40px; border-radius:24px; max-width:420px; width: 100%; border: 1px solid #334155; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
-                                <div style="display:flex; justify-content:center; align-items:center; margin-bottom: 25px;">
-                                    <svg viewBox="0 0 280 150" style="height: 40px; width: auto;" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g1s" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2563EB"/><stop offset="100%" stop-color="#8B5CF6"/></linearGradient><linearGradient id="g2s" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#EC4899"/></linearGradient><linearGradient id="g3s" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#EC4899"/><stop offset="100%" stop-color="#F97316"/></linearGradient></defs><g stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 32 110 L 32 65 A 34 34 0 0 1 100 65 L 100 110" stroke="url(#g1s)" stroke-width="32" /><path d="M 100 110 L 100 65 A 34 34 0 0 1 168 65 L 168 110" stroke="url(#g2s)" stroke-width="32" /><path d="M 229 13.2 L 229 53.2 M 209 33.2 L 249 33.2" stroke="url(#g3s)" stroke-width="24" /></g></svg>
-                                    <span style="font-weight: 900; font-size: 26px; margin-left: 10px; letter-spacing: -1px; font-family:'Montserrat', sans-serif;">MAS</span>
-                                    <span style="font-weight: 700; font-size: 26px; margin-left: 4px; letter-spacing: -1px; font-family:'Montserrat', sans-serif;">Digital</span>
-                                    <span style="width: 8px; height: 8px; background: #F97316; border-radius: 50%; margin-left: 4px;"></span>
-                                </div>
-                                <div style="width: 70px; height: 70px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-                                    <span style="font-size:32px;">🔒</span>
-                                </div>
-                                <h1 style="color:#ef4444; margin-top:0; margin-bottom: 12px; font-size:24px; font-weight: 800;">Suscripción Vencida</h1>
-                                <p style="color:#94a3b8; font-size:14px; line-height:1.6; margin-bottom: 30px;">El acceso a este sistema ha sido restringido por falta de pago. Por favor, regularice su suscripción para reactivar el servicio.</p>
-                                <div style="padding-top:20px; border-top:1px solid #334155; display:flex; flex-direction:column; gap:10px;">
-                                    <p style="margin:0; color:#cbd5e1; font-size:12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Contacto de Soporte</p>
-                                    <a href="https://wa.me/51931355694" target="_blank" style="display:inline-flex; align-items:center; justify-content:center; gap:8px; background:#2563EB; color:white; padding:14px 20px; border-radius:12px; text-decoration:none; font-weight:700; font-size:16px; transition: all 0.2s;">
-                                        📞 931 355 694
-                                    </a>
-                                </div>
-                            </div>
-                        </div>`;
-                        return;
+                    // Guardar en Caché para la próxima vez
+                    if (licencia) {
+                        localStorage.setItem(cacheKey, JSON.stringify(licencia));
+                        localStorage.setItem(cacheTimeKey, now.toString());
                     }
-                    if (licencia && licencia.estado === 'AVISO' && licencia.mensaje) {
-                        var banner = document.createElement('div');
-                        banner.innerHTML = "⚠️ <b>Aviso MAS Digital:</b> " + licencia.mensaje;
-                        banner.style.cssText = "background-color:#f59e0b; color:#000; text-align:center; padding:12px 20px; font-size:14px; position:sticky; top:0; z-index:999999; width:100%; font-family:sans-serif;";
-                        document.body.prepend(banner);
-                    }
+                    
+                    ejecutarAccionLicencia(licencia);
                     if(callback) callback();
                 })
                 .withFailureHandler(function() {
@@ -102,6 +95,23 @@
                     if(callback) callback(); // Permitir pasar si hay falla de internet leve
                 })
                 .verificarLicencia();
+        }
+
+        function ejecutarAccionLicencia(licencia) {
+            if (licencia && licencia.estado === 'SUSPENDIDO') {
+                document.body.innerHTML = '<div style="font-family: Arial, sans-serif; text-align:center; padding:40px 20px; background-color:#0f172a; color:white; height:100vh; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; align-items:center;"><div style="background:#1e293b; padding:40px; border-radius:16px; max-width:400px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"><div style="display:flex; justify-content:center; align-items:center; margin-bottom: 25px;"><svg viewBox="0 0 280 150" style="height: 40px; width: auto;" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g1s" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2563EB"/><stop offset="100%" stop-color="#8B5CF6"/></linearGradient><linearGradient id="g2s" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#EC4899"/></linearGradient><linearGradient id="g3s" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#EC4899"/><stop offset="100%" stop-color="#F97316"/></linearGradient></defs><g stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 32 110 L 32 65 A 34 34 0 0 1 100 65 L 100 110" stroke="url(#g1s)" stroke-width="32" /><path d="M 100 110 L 100 65 A 34 34 0 0 1 168 65 L 168 110" stroke="url(#g2s)" stroke-width="32" /><path d="M 229 13.2 L 229 53.2 M 209 33.2 L 249 33.2" stroke="url(#g3s)" stroke-width="24" /></g></svg><span style="font-weight: 900; font-size: 26px; margin-left: 10px; letter-spacing: -1px; font-family:\'Montserrat\', sans-serif;">MAS</span><span style="font-weight: 700; font-size: 26px; margin-left: 4px; letter-spacing: -1px; font-family:\'Montserrat\', sans-serif;">Digital</span><span style="width: 8px; height: 8px; background: #F97316; border-radius: 50%; margin-left: 4px;"></span></div><div style="font-size:48px; margin-bottom:10px;">🔒</div><h1 style="color:#ef4444; margin-top:0; font-size:24px;">Suscripción Vencida</h1><p style="color:#94a3b8; font-size:14px; line-height:1.6;">El acceso a este sistema ha sido restringido. Por favor, regularice su suscripción.</p><div style="margin-top:30px; padding-top:20px; border-top:1px solid #334155;"><p style="margin:0; color:#cbd5e1; font-size:13px; margin-bottom:10px;">Comunícate con soporte:</p><a href="https://wa.me/51931355694" target="_blank" style="display:inline-block; background:#2563EB; color:white; text-decoration:none; padding:12px 24px; border-radius:8px; font-weight:bold; font-size:16px;">📞 931 355 694</a></div></div></div>';
+                return;
+            }
+            if (licencia && licencia.estado === 'AVISO' && licencia.mensaje) {
+                var existingBanner = document.getElementById('licencia-banner');
+                if(!existingBanner) {
+                    var banner = document.createElement('div');
+                    banner.id = 'licencia-banner';
+                    banner.innerHTML = "⚠️ <b>Aviso MAS Digital:</b> " + licencia.mensaje;
+                    banner.style.cssText = "background-color:#f59e0b; color:#000; text-align:center; padding:12px 20px; font-size:14px; position:sticky; top:0; z-index:999999; width:100%; font-family:sans-serif;";
+                    document.body.prepend(banner);
+                }
+            }
         }
     </script>
     <!-- ========================================================================= -->
@@ -230,11 +240,11 @@
                 </svg>
                 <div class="flex flex-col mt-1">
                     <div class="flex items-baseline leading-none">
-                        <span class="font-display font-[900] text-2xl text-slate-900 dark:text-white tracking-tighter">MAS</span>
-                        <span class="font-display font-[700] text-2xl text-slate-900 dark:text-white tracking-tighter ml-1">Digital</span>
-                        <span class="w-2.5 h-2.5 bg-brand-orange rounded-full ml-1 relative top-[-1px]"></span>
+                        <span class="font-display font-[900] text-3xl text-slate-900 dark:text-white tracking-tighter">MAS</span>
+                        <span class="font-display font-[700] text-3xl text-slate-900 dark:text-white tracking-tighter ml-1">Digital</span>
+                        <span class="w-3 h-3 bg-brand-orange rounded-full ml-1.5 relative top-[-1px]"></span>
                     </div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 block">Portal Admin</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">Portal Admin</span>
                 </div>
             </div>
 
@@ -666,7 +676,6 @@
            ========================================================================= */
         var html5QrCode = null;
         var isProcessingScan = false;
-        
         var myAudioContext = null;
 
         function emitirSonidoBeep() {
@@ -681,17 +690,17 @@
                 var oscillator = myAudioContext.createOscillator();
                 var gainNode = myAudioContext.createGain();
                 
-                oscillator.type = 'sine'; // Sonido suave
-                oscillator.frequency.value = 880; // Frecuencia alta (tono de confirmación)
+                oscillator.type = 'square'; // Tipo de onda más intensa y ruidosa
+                oscillator.frequency.value = 900; // Frecuencia más alta
                 
-                gainNode.gain.setValueAtTime(0.1, myAudioContext.currentTime); // Volumen inicial
-                gainNode.gain.exponentialRampToValueAtTime(0.00001, myAudioContext.currentTime + 0.1); // Caída rápida
+                gainNode.gain.setValueAtTime(1.0, myAudioContext.currentTime); // Volumen máximo 100%
+                gainNode.gain.exponentialRampToValueAtTime(0.01, myAudioContext.currentTime + 0.15); // Un pitido más larguito
                 
                 oscillator.connect(gainNode);
                 gainNode.connect(myAudioContext.destination);
                 
                 oscillator.start(myAudioContext.currentTime);
-                oscillator.stop(myAudioContext.currentTime + 0.1);
+                oscillator.stop(myAudioContext.currentTime + 0.15);
             } catch(e) {
                 console.log("No se pudo reproducir el sonido: ", e);
             }
@@ -716,7 +725,7 @@
         }
 
         function activarCamaraReal() {
-            // Activar AudioContext con interacción del usuario (requisito de iOS)
+            // Inicializar AudioContext con interacción de usuario para iOS
             if (!myAudioContext) {
                 myAudioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
@@ -738,7 +747,8 @@
                 html5QrCode = new Html5Qrcode("reader");
             }
 
-            var config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+            // CONFIGURACIÓN ACELERADA DE CÁMARA (20 fps en lugar de 10)
+            var config = { fps: 20, qrbox: { width: 250, height: 250 } };
             
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, undefined)
                 .then(function() {
@@ -818,17 +828,23 @@
             if (isProcessingScan) return;
             isProcessingScan = true;
             
+            // Emitir sonido fuerte al detectar
             emitirSonidoBeep();
 
-            showModal("Procesando", "Verificando credencial en el servidor...", true);
-            document.getElementById('modal-icon').innerText = "⏳";
+            document.getElementById('loader-text').innerText = "Guardando en la nube...";
+            document.getElementById('loader-overlay').classList.remove('hidden');
+            document.getElementById('loader-overlay').classList.add('flex');
             
             google.script.run
                 .withSuccessHandler(function(res) {
+                    document.getElementById('loader-overlay').classList.add('hidden');
+                    document.getElementById('loader-overlay').classList.remove('flex');
                     showModal(res.success ? "Ingreso Registrado" : "Atención", res.message, res.success);
                     setTimeout(function() { isProcessingScan = false; }, 3000); 
                 })
                 .withFailureHandler(function() {
+                    document.getElementById('loader-overlay').classList.add('hidden');
+                    document.getElementById('loader-overlay').classList.remove('flex');
                     showModal("Error", "Problema de red con el servidor central.", false);
                     setTimeout(function() { isProcessingScan = false; }, 3000);
                 })
@@ -861,17 +877,22 @@
                 cuentaBancaria: document.getElementById('reg-banco').value.trim()
             };
 
-            showModal("Guardando", "Registrando ficha en base de datos...", true);
-            document.getElementById('modal-icon').innerText = "⏳";
+            document.getElementById('loader-text').innerText = "Registrando empleado...";
+            document.getElementById('loader-overlay').classList.remove('hidden');
+            document.getElementById('loader-overlay').classList.add('flex');
 
             google.script.run
                 .withSuccessHandler(function(res) {
+                    document.getElementById('loader-overlay').classList.add('hidden');
+                    document.getElementById('loader-overlay').classList.remove('flex');
                     if(res.success) {
                         showModal("Personal Registrado", res.message, true);
                         document.getElementById('form-registro').reset();
                     } else showModal("Error en Registro", res.message, false);
                 })
                 .withFailureHandler(function() {
+                    document.getElementById('loader-overlay').classList.add('hidden');
+                    document.getElementById('loader-overlay').classList.remove('flex');
                     showModal("Error Crítico", "Fallo al comunicar con la base de datos.", false);
                 })
                 .registrarEmpleado(data);
@@ -920,9 +941,8 @@
                         var emp = empleados[i];
                         if(emp.estado === 'A' || emp.estado === 'T') asis++;
                         else if(emp.estado === 'F' || emp.estado === '-') faltas++;
-                        else if(emp.estado !== 'AB' && emp.estado !== 'R') exc++; // No contamos Retiros ni Abandonos en Excepciones
+                        else if (emp.estado !== 'R' && emp.estado !== 'AB') exc++; 
 
-                        // Pintar fila entera gris transparente si es Retiro o Abandono
                         var trClass = "hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors bg-white dark:bg-slate-900";
                         if (emp.estado === 'R' || emp.estado === 'AB') {
                             trClass = "bg-slate-50 dark:bg-slate-900/50 opacity-60 grayscale";
@@ -993,9 +1013,8 @@
                 .withSuccessHandler(function(res) {
                     if(res.success) {
                         showToast("Estado Actualizado.");
-                        // Recargar la tabla si elegimos Abandono o Retiro para que aplique el color gris a la fila
-                        if (nuevoEstado === 'R' || nuevoEstado === 'AB' || selectElement.parentElement.parentElement.parentElement.classList.contains('grayscale')) {
-                            cargarTareoHoy();
+                        if(nuevoEstado === 'R' || nuevoEstado === 'AB' || selectElement.parentElement.parentElement.parentElement.classList.contains('grayscale')) {
+                             cargarTareoHoy();
                         }
                     }
                     else showToast("No se pudo guardar.", true);
@@ -1038,7 +1057,7 @@
                                 '<span class="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-purple-50 dark:bg-purple-900/20 text-brand-purple font-black text-sm">' + emp.justificados + '</span>' +
                             '</td>' +
                             '<td class="py-4 px-6 text-center border-b border-slate-100 dark:border-slate-800/80">' +
-                                '<span class="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-500 font-black text-sm font-mono tracking-tighter">' + emp.minutosTarde + '</span>' +
+                                '<span class="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-500 font-black text-sm font-mono tracking-tighter">' + emp.tardanzas + '</span>' +
                             '</td>';
                         tbody.appendChild(tr);
                     }
@@ -1080,12 +1099,14 @@
             var pass = document.getElementById('auth-pass').value.trim();
             if(!pass) return showToast("Ingrese contraseña", true);
             
-            showModal("Procesando", "Verificando credenciales...", true);
-            document.getElementById('modal-icon').innerText = "⏳";
+            document.getElementById('loader-text').innerText = "Verificando credenciales...";
+            document.getElementById('loader-overlay').classList.remove('hidden');
+            document.getElementById('loader-overlay').classList.add('flex');
 
             google.script.run
                 .withSuccessHandler(function(res) {
-                    closeModal();
+                    document.getElementById('loader-overlay').classList.add('hidden');
+                    document.getElementById('loader-overlay').classList.remove('flex');
                     if(res.success) {
                         isAuthenticated = true; 
                         currentAuthPass = pass;
@@ -1093,7 +1114,11 @@
                         switchTab('ajustes');
                     } else showToast("Contraseña incorrecta", true);
                 })
-                .withFailureHandler(function() { closeModal(); showToast("Error de conexión", true); })
+                .withFailureHandler(function() { 
+                    document.getElementById('loader-overlay').classList.add('hidden');
+                    document.getElementById('loader-overlay').classList.remove('flex');
+                    showToast("Error de conexión", true); 
+                })
                 .verificarPassword(pass);
         }
         
@@ -1169,12 +1194,15 @@
         }
 
         function centrarEnMiUbicacion() {
-            showModal("Ubicando", "Obteniendo coordenadas...", true);
-            document.getElementById('modal-icon').innerText = "📍";
+            document.getElementById('loader-text').innerText = "Obteniendo ubicación...";
+            document.getElementById('loader-overlay').classList.remove('hidden');
+            document.getElementById('loader-overlay').classList.add('flex');
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
-                    closeModal();
+                    document.getElementById('loader-overlay').classList.add('hidden');
+                    document.getElementById('loader-overlay').classList.remove('flex');
+
                     var lat = position.coords.latitude;
                     var lng = position.coords.longitude;
                     
@@ -1190,11 +1218,13 @@
                     }
                     showToast("Ubicación actualizada en el mapa");
                 }, function(error) {
-                    closeModal();
+                    document.getElementById('loader-overlay').classList.add('hidden');
+                    document.getElementById('loader-overlay').classList.remove('flex');
                     showToast("Permiso de ubicación denegado o no disponible.", true);
                 }, { enableHighAccuracy: true });
             } else {
-                closeModal();
+                document.getElementById('loader-overlay').classList.add('hidden');
+                document.getElementById('loader-overlay').classList.remove('flex');
                 showToast("Tu navegador no soporta geolocalización.", true);
             }
         }
@@ -1216,19 +1246,25 @@
                 radio: parseInt(document.getElementById('conf-radio').value) || 15
             };
             
-            showModal("Guardando", "Aplicando cambios en el servidor...", true);
-            document.getElementById('modal-icon').innerText = "⏳";
+            document.getElementById('loader-text').innerText = "Aplicando cambios...";
+            document.getElementById('loader-overlay').classList.remove('hidden');
+            document.getElementById('loader-overlay').classList.add('flex');
 
             google.script.run
                 .withSuccessHandler(function(res) {
-                    closeModal();
+                    document.getElementById('loader-overlay').classList.add('hidden');
+                    document.getElementById('loader-overlay').classList.remove('flex');
                     if(res.success) {
                         showToast("Ajustes guardados correctamente");
                         if (nuevaPass !== "") currentAuthPass = nuevaPass; 
                         document.getElementById('conf-pass').value = ""; 
                     } else showToast(res.message, true);
                 })
-                .withFailureHandler(function() { closeModal(); showToast("Fallo de red", true); })
+                .withFailureHandler(function() { 
+                    document.getElementById('loader-overlay').classList.add('hidden');
+                    document.getElementById('loader-overlay').classList.remove('flex');
+                    showToast("Fallo de red", true); 
+                })
                 .saveConfig(currentAuthPass, data); 
         }
 
