@@ -20,7 +20,7 @@
     <!-- ========================================================================= -->
     <script>
         // 🛑🛑 ¡ATENCIÓN! PEGA AQUÍ TU URL DE IMPLEMENTACIÓN DE GOOGLE APPS SCRIPT 🛑🛑
-        var URL_BACKEND_GOOGLE = "https://script.google.com/macros/s/AKfycbz8UF_RaTANwN9H1KqrdWlVxwETJWjaiWZtkekRuKyAqqnH7WuxXCrIGDc-0RFmNamgyg/exec";
+        var URL_BACKEND_GOOGLE = "https://script.google.com/macros/s/TU_URL_DE_GOOGLE_AQUI/exec";
 
         window.google = {
             script: {
@@ -252,7 +252,7 @@
     <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full transition-all">
 
         <!-- ==========================================
-             NUEVO DISEÑO DE ESCÁNER (Cámara en Vivo en GitHub funciona sin problema)
+             NUEVO DISEÑO DE ESCÁNER (Basado en imagen)
              ========================================== -->
         <section id="view-escaner" class="flex flex-col items-center justify-center min-h-[65vh] bg-slate-50/50 dark:bg-slate-900/30 rounded-3xl p-4">
             
@@ -548,7 +548,7 @@
 
     </main>
 
-    <!-- INICIO DE JAVASCRIPT ES5 CLÁSICO (Compatible con todo celular antiguo y nuevo) -->
+    <!-- INICIO DE JAVASCRIPT ES5 CLÁSICO -->
     <script>
         /* --- Theme Toggle --- */
         function toggleTheme() {
@@ -656,11 +656,16 @@
 
         function activarCamaraReal() {
             var uiContainer = document.getElementById('scanner-ui');
+            var readerContainer = document.getElementById('reader'); // <- Elemento del video
+
             uiContainer.innerHTML = '<div class="flex flex-col items-center">' +
                                     '<svg class="animate-spin h-10 w-10 text-brand-blue dark:text-white mb-4 drop-shadow-md" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>' +
                                     '<span class="text-slate-900 dark:text-white font-bold text-sm tracking-widest uppercase drop-shadow-md text-center">Iniciando Cámara...<br/><span class="text-xs font-normal capitalize text-slate-500 dark:text-slate-300">Por favor, acepta los permisos.</span></span>' +
                                     '</div>';
             
+            // ¡LA SOLUCIÓN! Le quitamos lo invisible al contenedor para que se vea el video
+            readerContainer.classList.remove('hidden');
+
             if (!html5QrCode) {
                 html5QrCode = new Html5Qrcode("reader");
             }
@@ -685,6 +690,7 @@
                         document.getElementById('scanner-laser').classList.remove('hidden');
                     }).catch(function(finalErr) {
                         console.error("Error total de cámara:", finalErr);
+                        readerContainer.classList.add('hidden'); // Ocultar si falla
                         uiContainer.innerHTML = '<div class="text-center">' +
                                                 '<span class="text-5xl mb-4 block">🚫</span>' +
                                                 '<p class="text-slate-800 dark:text-slate-200 font-bold mb-2 text-lg">Cámara Bloqueada</p>' +
@@ -733,6 +739,10 @@
             }
             var laser = document.getElementById('scanner-laser');
             if (laser) laser.classList.add('hidden');
+
+            // ¡LA SOLUCIÓN! Volvemos a ocultar el recuadro negro cuando se detiene
+            var readerContainer = document.getElementById('reader');
+            if (readerContainer) readerContainer.classList.add('hidden');
         }
 
         function onScanSuccess(decodedText) {
