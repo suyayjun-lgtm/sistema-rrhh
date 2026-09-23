@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAS Digital | Sistema Corporativo</title>
+    <title>MAS Digital | Portal Admin</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,83 +15,51 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- ========================================================================= -->
-    <!--  INYECCIÓN DEL CEREBRO PARA GITHUB PAGES (CONVERSIÓN API AUTOMÁTICA)      -->
-    <!-- ========================================================================= -->
+    <!-- INYECCIÓN DEL CEREBRO PARA GITHUB PAGES -->
     <script>
-        // 🛑🛑 ¡ATENCIÓN! PEGA AQUÍ TU URL DE IMPLEMENTACIÓN DE GOOGLE APPS SCRIPT 🛑🛑
-        var URL_BACKEND_GOOGLE = "https://script.google.com/macros/s/AKfycbxRNorCw4CyFvfmtS7K2vXqK8KqdAg2UmyNWB8rdPL68gJorRXPfDhI6ATjRK3Df8lZXQ/exec";
+        // 🛑 PEGA AQUÍ TU URL GENERADA EN GOOGLE APPS SCRIPT (NUEVA IMPLEMENTACIÓN)
+        var URL_BACKEND_GOOGLE = "https://script.google.com/macros/s/AKfycbwnBe-MeJ_ODoZxji0LR_XLD2UGPsU42_6_mvGrfjIPj4U0gU7rVpHoN2b5TqzGe8L28Q/exec";
 
-        window.google = {
-            script: {
-                run: {
-                    withSuccessHandler: function(cb) { this._success = cb; return this; },
-                    withFailureHandler: function(cb) { this._failure = cb; return this; },
-                    _callApi: function(accion, payload) {
-                        var self = this;
-                        if (!payload) payload = {};
-                        var form = new URLSearchParams();
-                        form.append('accion', accion);
-                        form.append('payload', JSON.stringify(payload));
-                        
-                        fetch(URL_BACKEND_GOOGLE, { method: 'POST', body: JSON.stringify({accion: accion, payload: payload}), headers: {"Content-Type": "text/plain;charset=utf-8"} })
-                        .then(function(r) { return r.json(); })
-                        .then(function(data) { if (self._success) self._success(data); })
-                        .catch(function(err) { if (self._failure) self._failure(err); });
-                    },
-                    getConfig: function() { this._callApi('getConfig'); },
-                    registrarAsistenciaQR: function(qr) { this._callApi('registrarAsistenciaQR', { qr: qr }); },
-                    obtenerTareoHoy: function() { this._callApi('obtenerTareoHoy'); },
-                    obtenerMiTareoMensual: function(dni, offset) { this._callApi('obtenerMiTareoMensual', { dni: dni, offset: offset }); },
-                    registrarEmpleado: function(data) { this._callApi('registrarEmpleado', { data: data }); },
-                    actualizarEstadoManual: function(dni, estado) { this._callApi('actualizarEstadoManual', { dni: dni, estado: estado }); },
-                    obtenerReporteMensual: function() { this._callApi('obtenerReporteMensual'); },
-                    verificarPassword: function(pass) { this._callApi('verificarPassword', { pass: pass }); },
-                    saveConfig: function(oldPass, data) { this._callApi('saveConfig', { oldPass: oldPass, data: data }); },
-                    verificarLicencia: function() { this._callApi('verificarLicencia'); }
+        if (typeof google === 'undefined' || !google.script) {
+            window.google = {
+                script: {
+                    run: {
+                        withSuccessHandler: function(cb) { this._success = cb; return this; },
+                        withFailureHandler: function(cb) { this._failure = cb; return this; },
+                        _callApi: function(accion, payload) {
+                            var self = this;
+                            fetch(URL_BACKEND_GOOGLE, { 
+                                method: 'POST', 
+                                body: JSON.stringify({accion: accion, payload: payload || {}}), 
+                                headers: {"Content-Type": "text/plain;charset=utf-8"} 
+                            })
+                            .then(function(r) { return r.json(); })
+                            .then(function(data) { if (self._success) self._success(data); })
+                            .catch(function(err) { if (self._failure) self._failure(err); });
+                        },
+                        getConfig: function() { this._callApi('getConfig'); },
+                        registrarAsistenciaQR: function(qr) { this._callApi('registrarAsistenciaQR', { qr: qr }); },
+                        obtenerTareoHoy: function() { this._callApi('obtenerTareoHoy'); },
+                        actualizarEstadoManual: function(dni, estado) { this._callApi('actualizarEstadoManual', { dni: dni, estado: estado }); },
+                        obtenerReporteMensual: function() { this._callApi('obtenerReporteMensual'); },
+                        verificarPassword: function(pass) { this._callApi('verificarPassword', { pass: pass }); },
+                        saveConfig: function(oldPass, data) { this._callApi('saveConfig', { oldPass: oldPass, data: data }); },
+                        registrarEmpleado: function(data) { this._callApi('registrarEmpleado', { data: data }); }
+                    }
                 }
-            }
-        };
-
-        // Lógica de Bloqueo desde GitHub
-        function verificarAcceso(callback) {
-            document.getElementById('loader-text').innerText = "Verificando licencia...";
-            document.getElementById('loader-overlay').classList.remove('hidden');
-            document.getElementById('loader-overlay').classList.add('flex');
-            
-            google.script.run
-                .withSuccessHandler(function(licencia) {
-                    document.getElementById('loader-overlay').classList.add('hidden');
-                    document.getElementById('loader-overlay').classList.remove('flex');
-                    
-                    if (licencia && licencia.estado === 'SUSPENDIDO') {
-                        document.body.innerHTML = '<div style="font-family: Arial, sans-serif; text-align:center; padding:40px 20px; background-color:#0f172a; color:white; height:100vh; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; align-items:center;"><div style="background:#1e293b; padding:40px; border-radius:16px; max-width:400px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"><div style="font-size:48px; margin-bottom:10px;">🔒</div><h1 style="color:#ef4444; margin-top:0; font-size:24px;">Suscripción Vencida</h1><p style="color:#94a3b8; font-size:14px; line-height:1.6;">El acceso a este sistema ha sido restringido. Por favor, regularice su suscripción.</p><div style="margin-top:30px; padding-top:20px; border-top:1px solid #334155;"><p style="margin:0; color:#cbd5e1; font-size:13px;">Comunícate con soporte:</p><h3 style="margin:5px 0 0 0; color:#3b82f6;">MAS Digital</h3></div></div></div>';
-                        return;
-                    }
-                    if (licencia && licencia.estado === 'AVISO' && licencia.mensaje) {
-                        var banner = document.createElement('div');
-                        banner.innerHTML = "⚠️ <b>Aviso MAS Digital:</b> " + licencia.mensaje;
-                        banner.style.cssText = "background-color:#f59e0b; color:#000; text-align:center; padding:12px 20px; font-size:14px; position:sticky; top:0; z-index:999999; width:100%; font-family:sans-serif;";
-                        document.body.prepend(banner);
-                    }
-                    if(callback) callback();
-                })
-                .withFailureHandler(function() {
-                    document.getElementById('loader-overlay').classList.add('hidden');
-                    document.getElementById('loader-overlay').classList.remove('flex');
-                    if(callback) callback(); // Permitir pasar si hay falla de internet leve
-                })
-                .verificarLicencia();
+            };
         }
     </script>
-    <!-- ========================================================================= -->
 
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Montserrat', 'sans-serif'] },
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'], 
+                        display: ['Montserrat', 'sans-serif'] 
+                    },
                     colors: {
                         brand: { blue: '#2563EB', purple: '#8B5CF6', orange: '#F97316', pink: '#EC4899' },
                         slate: { 850: '#151e2e', 900: '#0f172a' } 
@@ -131,7 +99,6 @@
         .dark .nav-pill:hover { color: #f8fafc; background-color: #334155; }
         .dark .nav-pill.active { background-color: #3b82f6; color: #ffffff; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4); }
 
-        /* Estilos del escáner */
         #reader { border: none !important; border-radius: 1.5rem; overflow: hidden; background: transparent; }
         #reader video { border-radius: 1.5rem; object-fit: cover; width: 100%; height: 100%; }
         #reader__dashboard_section_csr button { display: none !important; }
@@ -148,13 +115,13 @@
         select option { background-color: #ffffff; color: #0f172a; font-weight: 500; }
         .dark select option { background-color: #1e293b; color: #f8fafc; }
         
-        /* Contenedor del mapa - Altura fija obligatoria para Leaflet */
         #map-container { height: 350px; width: 100%; border-radius: 0.75rem; z-index: 10; border: 1px solid #e2e8f0; }
         .dark #map-container { border-color: #334155; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col relative">
 
+    <!-- Loading Overlay -->
     <div id="loader-overlay" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-sm transition-all">
         <div class="flex flex-col items-center gap-4 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700">
             <svg class="animate-spin h-10 w-10 text-brand-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -162,7 +129,8 @@
         </div>
     </div>
 
-    <div id="custom-modal" class="fixed inset-0 z-50 hidden grid place-items-center bg-slate-900/50 dark:bg-black/60 backdrop-blur-sm transition-opacity duration-200 opacity-0">
+    <!-- Custom Modal Profesional -->
+    <div id="custom-modal" class="fixed inset-0 z-50 hidden place-items-center bg-slate-900/50 dark:bg-black/60 backdrop-blur-sm transition-opacity duration-200 opacity-0" style="display: none;">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl max-w-sm w-[90%] shadow-2xl transform scale-95 transition-transform duration-200 border border-gray-100 dark:border-slate-700" id="modal-content">
             <div class="flex flex-col items-center text-center gap-3 mb-6" id="modal-header">
                 <div class="w-16 h-16 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center mb-2" id="modal-icon-container">
@@ -175,12 +143,14 @@
         </div>
     </div>
 
+    <!-- Toast -->
     <div id="toast" class="fixed bottom-6 right-6 z-[120] transform translate-y-12 opacity-0 transition-all duration-300 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 font-semibold text-sm border border-slate-800 dark:border-gray-200">
         <span id="toast-icon">✅</span>
         <span id="toast-msg">Acción completada</span>
     </div>
 
-    <div id="auth-modal" class="fixed inset-0 z-[60] hidden grid place-items-center bg-slate-900/50 dark:bg-black/60 backdrop-blur-sm transition-opacity duration-200 opacity-0">
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="fixed inset-0 z-[60] hidden place-items-center bg-slate-900/50 dark:bg-black/60 backdrop-blur-sm transition-opacity duration-200 opacity-0" style="display: none;">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl max-w-sm w-[90%] shadow-2xl border border-gray-100 dark:border-slate-700 transform scale-95 transition-transform duration-200" id="auth-content">
             <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 text-center">Acceso Restringido</h3>
             <p class="text-sm text-slate-500 dark:text-slate-400 text-center mb-6">Ingrese la contraseña de administrador para configurar horarios.</p>
@@ -192,6 +162,7 @@
         </div>
     </div>
 
+    <!-- Header Navigation (AHORA IGUAL AL PORTAL EMPLEADO) -->
     <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 md:px-8 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
             
@@ -208,11 +179,17 @@
                         <path d="M 229 13.2 L 229 53.2 M 209 33.2 L 249 33.2" stroke="url(#g3)" stroke-width="24" />
                     </g>
                 </svg>
-                <div class="flex items-baseline mt-1">
-                    <span class="font-display font-[900] text-3xl leading-none text-slate-900 dark:text-white tracking-tighter">WORKSPACE</span>
+                <div class="flex flex-col">
+                    <div class="flex items-baseline leading-none">
+                        <span class="font-display font-[900] text-2xl md:text-3xl text-slate-900 dark:text-white tracking-tighter">MAS</span>
+                        <span class="font-display font-[700] text-2xl md:text-3xl text-slate-900 dark:text-white tracking-tighter ml-1">Digital</span>
+                        <span class="w-2.5 h-2.5 bg-brand-orange rounded-full ml-1 relative top-[-1px]"></span>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Portal Admin</span>
                 </div>
             </div>
 
+            <!-- Navigation Pills -->
             <div class="flex items-center gap-3 w-full md:w-auto overflow-x-auto hide-scrollbar pb-2 md:pb-0">
                 <nav class="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
                     <button onclick="switchTab('escaner')" id="tab-escaner" class="nav-pill active flex items-center gap-2 whitespace-nowrap">
@@ -250,18 +227,16 @@
     <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full transition-all">
 
         <!-- ==========================================
-             NUEVO DISEÑO DE ESCÁNER (Basado en imagen)
+             NUEVO DISEÑO DE ESCÁNER
              ========================================== -->
         <section id="view-escaner" class="flex flex-col items-center justify-center min-h-[65vh] bg-slate-50/50 dark:bg-slate-900/30 rounded-3xl p-4">
             
             <div id="scanner-wrapper" class="relative p-8 bg-white dark:bg-slate-800 rounded-[2rem] w-full max-w-[400px] mx-auto flex flex-col items-center border border-slate-100 dark:border-slate-700 shadow-sm">
-                <!-- Esquinas decorativas sutiles -->
                 <div class="absolute top-6 left-6 w-8 h-8 border-t-2 border-l-2 border-slate-200 dark:border-slate-600 rounded-tl-xl pointer-events-none"></div>
                 <div class="absolute top-6 right-6 w-8 h-8 border-t-2 border-r-2 border-slate-200 dark:border-slate-600 rounded-tr-xl pointer-events-none"></div>
                 <div class="absolute bottom-6 left-6 w-8 h-8 border-b-2 border-l-2 border-slate-200 dark:border-slate-600 rounded-bl-xl pointer-events-none"></div>
                 <div class="absolute bottom-6 right-6 w-8 h-8 border-b-2 border-r-2 border-slate-200 dark:border-slate-600 rounded-br-xl pointer-events-none"></div>
 
-                <!-- Contenedor Animado -->
                 <div class="relative w-full aspect-square rounded-[1.5rem] overflow-hidden bg-white dark:bg-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-none border border-slate-50 dark:border-slate-700 flex items-center justify-center group z-10">
                     <div id="reader" class="w-full h-full absolute inset-0 z-0 bg-black hidden"></div>
 
@@ -387,7 +362,7 @@
         </section>
 
         <!-- ==========================================
-             NUEVO TAREO HR (Diseño Imagen 2)
+             NUEVO TAREO HR
              ========================================== -->
         <section id="view-manual" class="hidden h-full flex-col">
             <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -421,7 +396,7 @@
                 </div>
             </div>
 
-            <!-- Tabla de Asistencia Exacta a la Foto -->
+            <!-- Tabla de Asistencia -->
             <div class="bg-white dark:bg-slate-900 rounded-[1rem] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.03)] dark:shadow-none border border-slate-200 dark:border-slate-800 border-t-4 border-t-brand-blue">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm whitespace-nowrap">
@@ -433,17 +408,7 @@
                             </tr>
                         </thead>
                         <tbody id="tareo-tbody" class="divide-y divide-slate-100 dark:divide-slate-800">
-                            <tr>
-                                <td colspan="3" class="py-16 text-center">
-                                    <svg viewBox="0 0 280 150" class="h-10 w-auto mx-auto mb-4 animate-pulse grayscale" xmlns="http://www.w3.org/2000/svg">
-                                        <g stroke-linecap="round" stroke-linejoin="round" fill="none">
-                                            <path d="M 32 110 L 32 65 A 34 34 0 0 1 100 65 L 100 110" stroke="#2563EB" stroke-width="32" />
-                                            <path d="M 100 110 L 100 65 A 34 34 0 0 1 168 65 L 168 110" stroke="#8B5CF6" stroke-width="32" />
-                                            <path d="M 229 13.2 L 229 53.2 M 209 33.2 L 249 33.2" stroke="#F97316" stroke-width="24" />
-                                        </g>
-                                    </svg>
-                                </td>
-                            </tr>
+                            <tr><td colspan="3" class="p-16 text-center text-slate-500 font-medium">Sincroniza los datos para visualizar la tabla...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -475,17 +440,7 @@
                             </tr>
                         </thead>
                         <tbody id="reporte-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/80">
-                            <tr>
-                                <td colspan="5" class="p-16 text-center">
-                                    <svg viewBox="0 0 280 150" class="h-10 w-auto mx-auto mb-4 animate-pulse grayscale" xmlns="http://www.w3.org/2000/svg">
-                                        <g stroke-linecap="round" stroke-linejoin="round" fill="none">
-                                            <path d="M 32 110 L 32 65 A 34 34 0 0 1 100 65 L 100 110" stroke="#2563EB" stroke-width="32" />
-                                            <path d="M 100 110 L 100 65 A 34 34 0 0 1 168 65 L 168 110" stroke="#8B5CF6" stroke-width="32" />
-                                            <path d="M 229 13.2 L 229 53.2 M 209 33.2 L 249 33.2" stroke="#F97316" stroke-width="24" />
-                                        </g>
-                                    </svg>
-                                </td>
-                            </tr>
+                            <tr><td colspan="5" class="p-16 text-center text-slate-500 font-medium">Haz clic en actualizar para cargar el reporte...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -530,7 +485,6 @@
                             <p class="text-xs text-slate-500 mt-2">Margen de distancia permitida para los empleados.</p>
                         </div>
                         
-                        <!-- Campos Ocultos de Coordenadas, solo lectura -->
                         <div class="grid grid-cols-2 gap-4">
                             <div><label class="label-modern text-[10px]">Latitud (Automático)</label><input type="text" id="conf-lat" class="input-modern bg-slate-100 text-xs text-slate-500" readonly></div>
                             <div><label class="label-modern text-[10px]">Longitud (Automático)</label><input type="text" id="conf-lng" class="input-modern bg-slate-100 text-xs text-slate-500" readonly></div>
@@ -544,7 +498,6 @@
                                 <label class="label-modern !mb-1">Fijar Ubicación de la Empresa</label>
                                 <p class="text-xs text-slate-500">Mueve el pin a la puerta de ingreso.</p>
                             </div>
-                            <!-- Botón Mágico: Mi Ubicación -->
                             <button type="button" onclick="centrarEnMiUbicacion()" class="bg-blue-50 hover:bg-blue-100 text-brand-blue text-xs font-bold py-2 px-3 rounded-lg border border-blue-200 transition-colors flex items-center gap-1.5 shadow-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                 Mi Ubicación Actual
@@ -566,8 +519,33 @@
 
     </main>
 
-    <!-- INICIO DE JAVASCRIPT ES5 CLÁSICO -->
+    <!-- INICIO DE JAVASCRIPT ES5 COMPATIBLE -->
     <script>
+        // MOTOR DE SONIDO (Beeper nativo sin MP3)
+        var myAudioContext = null;
+        function emitirSonidoBeep() {
+            try {
+                if (!myAudioContext) {
+                    myAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (myAudioContext.state === 'suspended') {
+                    myAudioContext.resume();
+                }
+                var oscillator = myAudioContext.createOscillator();
+                var gainNode = myAudioContext.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 880;
+                gainNode.gain.setValueAtTime(0.1, myAudioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, myAudioContext.currentTime + 0.1);
+                oscillator.connect(gainNode);
+                gainNode.connect(myAudioContext.destination);
+                oscillator.start(myAudioContext.currentTime);
+                oscillator.stop(myAudioContext.currentTime + 0.1);
+            } catch(e) {
+                console.log("No se pudo emitir beep", e);
+            }
+        }
+
         /* --- Theme Toggle --- */
         function toggleTheme() {
             var html = document.documentElement;
@@ -582,12 +560,12 @@
         var isAuthenticated = false;
 
         function switchTab(viewId) {
-            views.forEach(function(v) {
-                var el = document.getElementById('view-' + v);
+            for(var i=0; i<views.length; i++) {
+                var el = document.getElementById('view-' + views[i]);
                 if (el) el.classList.add('hidden');
-                var tabEl = document.getElementById('tab-' + v);
+                var tabEl = document.getElementById('tab-' + views[i]);
                 if (tabEl) tabEl.classList.remove('active');
-            });
+            }
             
             var targetView = document.getElementById('view-' + viewId);
             if (targetView) targetView.classList.remove('hidden');
@@ -603,15 +581,6 @@
         }
 
         /* --- UI Helpers --- */
-        function showToast(msg, isError) {
-            if(isError === undefined) isError = false;
-            var toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            document.getElementById('toast-icon').innerText = isError ? "❌" : "✅";
-            toast.classList.remove('translate-y-12', 'opacity-0');
-            setTimeout(function() { toast.classList.add('translate-y-12', 'opacity-0'); }, 3000);
-        }
-
         function showModal(title, message, isSuccess) {
             if(isSuccess === undefined) isSuccess = true;
             document.getElementById('modal-title').innerText = title;
@@ -625,6 +594,7 @@
             var modal = document.getElementById('custom-modal');
             var content = document.getElementById('modal-content');
             modal.classList.remove('hidden');
+            modal.style.display = "grid";
             setTimeout(function() { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
         }
 
@@ -633,7 +603,26 @@
             var content = document.getElementById('modal-content');
             modal.classList.add('opacity-0');
             content.classList.add('scale-95');
-            setTimeout(function() { modal.classList.add('hidden'); }, 200);
+            setTimeout(function() { modal.classList.add('hidden'); modal.style.display = "none"; }, 200);
+        }
+
+        function showToast(msg, isError) {
+            var toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            document.getElementById('toast-icon').innerText = isError ? "❌" : "✅";
+            toast.classList.remove('translate-y-12', 'opacity-0');
+            setTimeout(function() { toast.classList.add('translate-y-12', 'opacity-0'); }, 3000);
+        }
+
+        function showLoader(text) {
+            if(!text) text = "Procesando...";
+            document.getElementById('loader-text').innerText = text;
+            document.getElementById('loader-overlay').classList.remove('hidden');
+            document.getElementById('loader-overlay').classList.add('flex');
+        }
+        function hideLoader() {
+            document.getElementById('loader-overlay').classList.add('hidden');
+            document.getElementById('loader-overlay').classList.remove('flex');
         }
 
         /* =========================================================================
@@ -641,35 +630,6 @@
            ========================================================================= */
         var html5QrCode = null;
         var isProcessingScan = false;
-        var myAudioContext = null;
-
-        function emitirSonidoBeep() {
-            try {
-                if (!myAudioContext) {
-                    myAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (myAudioContext.state === 'suspended') {
-                    myAudioContext.resume();
-                }
-                
-                var oscillator = myAudioContext.createOscillator();
-                var gainNode = myAudioContext.createGain();
-                
-                oscillator.type = 'sine'; // Sonido suave
-                oscillator.frequency.value = 880; // Frecuencia alta (tono de confirmación)
-                
-                gainNode.gain.setValueAtTime(0.1, myAudioContext.currentTime); // Volumen inicial
-                gainNode.gain.exponentialRampToValueAtTime(0.00001, myAudioContext.currentTime + 0.1); // Caída rápida
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(myAudioContext.destination);
-                
-                oscillator.start(myAudioContext.currentTime);
-                oscillator.stop(myAudioContext.currentTime + 0.1);
-            } catch(e) {
-                console.log("No se pudo reproducir el sonido: ", e);
-            }
-        }
 
         function iniciarScanner() {
             var uiContainer = document.getElementById('scanner-ui');
@@ -678,36 +638,30 @@
             if (laser) laser.classList.add('hidden');
             
             if (uiContainer && (!html5QrCode || (html5QrCode && !html5QrCode.isScanning))) {
-                uiContainer.innerHTML = '<div class="w-16 h-16 bg-[#f0f4ff] dark:bg-blue-900/30 text-brand-blue rounded-full flex items-center justify-center mb-5">' +
-                                        '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>' +
-                                        '</div>' +
-                                        '<h3 class="text-[20px] font-bold text-slate-800 dark:text-white mb-2 tracking-tight">Activar Cámara</h3>' +
-                                        '<p class="text-[13px] text-slate-500 dark:text-slate-400 text-center mb-8 px-4 leading-relaxed">Permitir acceso para leer el código en vivo.</p>' +
-                                        '<button onclick="activarCamaraReal()" class="w-full max-w-[240px] bg-brand-blue hover:bg-blue-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-500/20 text-sm">' +
-                                        'Iniciar Escáner' +
-                                        '</button>';
+                uiContainer.innerHTML = 
+                    '<div class="w-16 h-16 bg-[#f0f4ff] dark:bg-blue-900/30 text-brand-blue rounded-full flex items-center justify-center mb-5">' +
+                        '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>' +
+                    '</div>' +
+                    '<h3 class="text-[20px] font-bold text-slate-800 dark:text-white mb-2 tracking-tight">Activar Cámara</h3>' +
+                    '<p class="text-[13px] text-slate-500 dark:text-slate-400 text-center mb-8 px-4 leading-relaxed">Permitir acceso para leer el código en vivo.</p>' +
+                    '<button onclick="activarCamaraReal()" class="w-full max-w-[240px] bg-brand-blue hover:bg-blue-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-500/20 text-sm">' +
+                        'Iniciar Escáner' +
+                    '</button>';
             }
         }
 
         function activarCamaraReal() {
-            // Inicializar AudioContext aquí con la interacción del usuario es vital para Safari iOS
-            if (!myAudioContext) {
-                myAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (myAudioContext.state === 'suspended') {
-                myAudioContext.resume();
-            }
+            // Despierta el audio de safari/ios
+            if (!myAudioContext) myAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            if (myAudioContext.state === 'suspended') myAudioContext.resume();
 
             var uiContainer = document.getElementById('scanner-ui');
-            var readerContainer = document.getElementById('reader');
-
-            uiContainer.innerHTML = '<div class="flex flex-col items-center">' +
-                                    '<svg class="animate-spin h-10 w-10 text-brand-blue dark:text-white mb-4 drop-shadow-md" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>' +
-                                    '<span class="text-slate-900 dark:text-white font-bold text-sm tracking-widest uppercase drop-shadow-md text-center">Iniciando Cámara...<br/><span class="text-xs font-normal capitalize text-slate-500 dark:text-slate-300">Por favor, acepta los permisos.</span></span>' +
-                                    '</div>';
+            uiContainer.innerHTML = 
+                '<div class="flex flex-col items-center">' +
+                    '<svg class="animate-spin h-10 w-10 text-brand-blue dark:text-white mb-4 drop-shadow-md" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>' +
+                    '<span class="text-slate-900 dark:text-white font-bold text-sm tracking-widest uppercase drop-shadow-md text-center">Iniciando Cámara...<br/><span class="text-xs font-normal capitalize text-slate-500 dark:text-slate-300">Por favor, acepta los permisos.</span></span>' +
+                '</div>';
             
-            readerContainer.classList.remove('hidden');
-
             if (!html5QrCode) {
                 html5QrCode = new Html5Qrcode("reader");
             }
@@ -720,7 +674,6 @@
                     document.getElementById('scanner-laser').classList.remove('hidden');
                 })
                 .catch(function(err) {
-                    console.log("Fallo cámara trasera, intentando método secundario...", err);
                     Html5Qrcode.getCameras().then(function(devices) {
                         if (devices && devices.length > 0) {
                             return html5QrCode.start(devices[0].id, config, onScanSuccess, undefined);
@@ -731,14 +684,13 @@
                         uiContainer.classList.add('hidden');
                         document.getElementById('scanner-laser').classList.remove('hidden');
                     }).catch(function(finalErr) {
-                        console.error("Error total de cámara:", finalErr);
-                        readerContainer.classList.add('hidden'); 
-                        uiContainer.innerHTML = '<div class="text-center">' +
-                                                '<span class="text-5xl mb-4 block">🚫</span>' +
-                                                '<p class="text-slate-800 dark:text-slate-200 font-bold mb-2 text-lg">Cámara Bloqueada</p>' +
-                                                '<p class="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">Permiso denegado. Habilita el acceso en tu navegador y usa HTTPS.</p>' +
-                                                '<button onclick="iniciarScanner()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-xl transition-all">Reintentar</button>' +
-                                                '</div>';
+                        uiContainer.innerHTML = 
+                            '<div class="text-center">' +
+                                '<span class="text-5xl mb-4 block">🚫</span>' +
+                                '<p class="text-slate-800 dark:text-slate-200 font-bold mb-2 text-lg">Cámara Bloqueada</p>' +
+                                '<p class="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">Permiso denegado. Habilita el acceso en tu navegador y usa HTTPS.</p>' +
+                                '<button onclick="iniciarScanner()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-xl transition-all">Reintentar</button>' +
+                            '</div>';
                     });
                 });
         }
@@ -748,17 +700,15 @@
             var file = e.target.files[0];
             if(!html5QrCode) html5QrCode = new Html5Qrcode("reader");
 
-            var modal = document.getElementById('custom-modal');
-            showModal("Procesando", "Analizando código en la imagen...", true);
-            document.getElementById('modal-icon').innerText = "⏳";
-            
+            showLoader("Analizando código en la imagen...");
             html5QrCode.scanFile(file, true)
                 .then(function(decodedText) {
-                    closeModal();
+                    hideLoader();
                     onScanSuccess(decodedText);
                     document.getElementById('qr-upload').value = ''; 
                 })
                 .catch(function(err) {
+                    hideLoader();
                     showModal("Foto inválida", "No se detectó un código QR. Intente de nuevo.", false);
                     document.getElementById('qr-upload').value = '';
                 });
@@ -783,27 +733,25 @@
             }
             var laser = document.getElementById('scanner-laser');
             if (laser) laser.classList.add('hidden');
-
-            var readerContainer = document.getElementById('reader');
-            if (readerContainer) readerContainer.classList.add('hidden');
         }
 
         function onScanSuccess(decodedText) {
             if (isProcessingScan) return;
             isProcessingScan = true;
             
-            // Emitir sonido al detectar
+            // BEERPER ACTIVO
             emitirSonidoBeep();
 
-            showModal("Procesando", "Verificando credencial en el servidor...", true);
-            document.getElementById('modal-icon').innerText = "⏳";
+            showLoader("Verificando credencial...");
             
             google.script.run
                 .withSuccessHandler(function(res) {
+                    hideLoader();
                     showModal(res.success ? "Ingreso Registrado" : "Atención", res.message, res.success);
                     setTimeout(function() { isProcessingScan = false; }, 3000); 
                 })
                 .withFailureHandler(function() {
+                    hideLoader();
                     showModal("Error", "Problema de red con el servidor central.", false);
                     setTimeout(function() { isProcessingScan = false; }, 3000);
                 })
@@ -836,17 +784,19 @@
                 cuentaBancaria: document.getElementById('reg-banco').value.trim()
             };
 
-            showModal("Guardando", "Registrando ficha en base de datos...", true);
-            document.getElementById('modal-icon').innerText = "⏳";
-
+            showLoader("Registrando ficha en base de datos...");
             google.script.run
                 .withSuccessHandler(function(res) {
+                    hideLoader();
                     if(res.success) {
                         showModal("Personal Registrado", res.message, true);
                         document.getElementById('form-registro').reset();
-                    } else showModal("Error en Registro", res.message, false);
+                    } else {
+                        showModal("Error en Registro", res.message, false);
+                    }
                 })
                 .withFailureHandler(function() {
+                    hideLoader(); 
                     showModal("Error Crítico", "Fallo al comunicar con la base de datos.", false);
                 })
                 .registrarEmpleado(data);
@@ -870,10 +820,11 @@
         ];
 
         function getStyleClassForId(id) {
+            var found = LEYENDA[0];
             for(var i=0; i<LEYENDA.length; i++) {
-                if(LEYENDA[i].id === id) return LEYENDA[i].color;
+                if(LEYENDA[i].id === id) found = LEYENDA[i];
             }
-            return LEYENDA[0].color;
+            return found.color;
         }
 
         function cargarTareoHoy() {
@@ -891,26 +842,26 @@
 
                     var asis=0, faltas=0, exc=0;
 
-                    for(var i=0; i<empleados.length; i++) {
-                        var emp = empleados[i];
+                    for(var e=0; e<empleados.length; e++) {
+                        var emp = empleados[e];
                         if(emp.estado === 'A') asis++;
                         else if(emp.estado === 'F' || emp.estado === '-') faltas++;
-                        else if (emp.estado !== 'R' && emp.estado !== 'AB') exc++; // No sumar retirados a excepciones
-
-                        // Pintar fila entera si es retiro o abandono
-                        var trClass = "hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors bg-white dark:bg-slate-900";
-                        if (emp.estado === 'R' || emp.estado === 'AB') {
-                            trClass = "bg-slate-50 dark:bg-slate-900/50 opacity-60 grayscale";
-                        }
+                        else if (emp.estado !== 'AB' && emp.estado !== 'R') exc++;
 
                         var tr = document.createElement('tr');
-                        tr.className = trClass;
+                        
+                        var isRetirado = (emp.estado === 'AB' || emp.estado === 'R');
+                        if (isRetirado) {
+                            tr.className = "bg-slate-50 dark:bg-slate-900 opacity-50 grayscale transition-colors";
+                        } else {
+                            tr.className = "hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors bg-white dark:bg-slate-900";
+                        }
                         
                         var selectHTML = '<div class="relative inline-block w-48 text-left">' +
                             '<select onchange="cambiarEstado(\'' + emp.dni + '\', this)" class="w-full appearance-none outline-none pl-4 pr-10 py-2.5 text-sm font-bold rounded-xl border shadow-sm cursor-pointer transition-all ' + getStyleClassForId(emp.estado) + '">';
                         
-                        for(var j=0; j<LEYENDA.length; j++) {
-                            var op = LEYENDA[j];
+                        for(var L=0; L<LEYENDA.length; L++) {
+                            var op = LEYENDA[L];
                             var selected = (emp.estado === op.id) ? "selected" : "";
                             selectHTML += '<option value="' + op.id + '" class="bg-white dark:bg-slate-800 text-slate-900 dark:text-white py-2" ' + selected + '>' + op.id + ' - ' + op.label + '</option>';
                         }
@@ -920,12 +871,16 @@
                             '</div>' +
                         '</div>';
 
-                        var inicialesArr = emp.nombres.split(' ');
-                        var ini1 = inicialesArr.length > 0 ? inicialesArr[0].charAt(0) : "";
-                        var ini2 = inicialesArr.length > 1 ? inicialesArr[1].charAt(0) : "";
-                        var iniciales = (ini1 + ini2).toUpperCase();
+                        var partesNombres = emp.nombres.split(' ');
+                        var iniciales = "";
+                        if (partesNombres.length > 0) iniciales += partesNombres[0].charAt(0);
+                        if (partesNombres.length > 1) iniciales += partesNombres[1].charAt(0);
+                        iniciales = iniciales.toUpperCase();
 
-                        var extraHoraHtml = emp.estado === 'T' ? '<div class="mt-2 text-[10px] text-yellow-600 dark:text-yellow-400 font-mono tracking-tighter opacity-90 text-left w-48 inline-block"><span class="font-bold uppercase mr-1">Hora:</span> ' + emp.rawEstado + '</div>' : '';
+                        var rawHtml = '';
+                        if (emp.estado === 'T') {
+                            rawHtml = '<div class="mt-2 text-[10px] text-yellow-600 dark:text-yellow-400 font-mono tracking-tighter opacity-90 text-left w-48 inline-block"><span class="font-bold uppercase mr-1">Hora:</span> ' + emp.rawEstado + '</div>';
+                        }
 
                         tr.innerHTML = 
                             '<td class="py-4 px-6 border-b border-slate-100 dark:border-slate-800/80">' +
@@ -943,7 +898,8 @@
                                 '</div>' +
                             '</td>' +
                             '<td class="py-4 px-6 border-b border-slate-100 dark:border-slate-800/80 text-right relative">' +
-                                selectHTML + extraHoraHtml +
+                                selectHTML +
+                                rawHtml +
                             '</td>';
                         tbody.appendChild(tr);
                     }
@@ -968,9 +924,8 @@
                 .withSuccessHandler(function(res) {
                     if(res.success) {
                         showToast("Estado Actualizado.");
-                        // Recargar tabla visualmente para aplicar filtro gris si es R o AB
-                        if(nuevoEstado === 'R' || nuevoEstado === 'AB' || selectElement.parentElement.parentElement.parentElement.classList.contains('grayscale')) {
-                             cargarTareoHoy();
+                        if(nuevoEstado === 'R' || nuevoEstado === 'AB') {
+                             cargarTareoHoy(); // Recarga para pintar gris toda la fila
                         }
                     }
                     else showToast("No se pudo guardar.", true);
@@ -980,11 +935,12 @@
         }
 
         function cargarReporteMensual() {
+            showLoader("Calculando consolidado mensual...");
             var tbody = document.getElementById('reporte-tbody');
-            tbody.innerHTML = '<tr><td colspan="5" class="py-16 text-center"><svg viewBox="0 0 280 150" class="h-10 w-auto mx-auto mb-4 animate-pulse grayscale" xmlns="http://www.w3.org/2000/svg"><g stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 32 110 L 32 65 A 34 34 0 0 1 100 65 L 100 110" stroke="#2563EB" stroke-width="32" /><path d="M 100 110 L 100 65 A 34 34 0 0 1 168 65 L 168 110" stroke="#8B5CF6" stroke-width="32" /><path d="M 229 13.2 L 229 53.2 M 209 33.2 L 249 33.2" stroke="#F97316" stroke-width="24" /></g></svg></td></tr>';
             
             google.script.run
                 .withSuccessHandler(function(rep) {
+                    hideLoader();
                     tbody.innerHTML = '';
                     
                     if(!rep || rep.length === 0) {
@@ -1019,8 +975,8 @@
                     }
                 })
                 .withFailureHandler(function() { 
+                    hideLoader(); 
                     showToast("Error al leer resumen excel.", true); 
-                    tbody.innerHTML = '<tr><td colspan="5" class="p-16 text-center text-red-500 font-medium">Error de red</td></tr>';
                 })
                 .obtenerReporteMensual();
         }
@@ -1038,29 +994,26 @@
                 var content = document.getElementById('auth-content');
                 document.getElementById('auth-pass').value = '';
                 modal.classList.remove('hidden');
+                modal.style.display = "grid";
                 setTimeout(function() { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
                 document.getElementById('auth-pass').focus();
             }
         }
-        
         function closeAuthModal() {
             var modal = document.getElementById('auth-modal');
             var content = document.getElementById('auth-content');
             modal.classList.add('opacity-0');
             content.classList.add('scale-95');
-            setTimeout(function() { modal.classList.add('hidden'); }, 200);
+            setTimeout(function() { modal.classList.add('hidden'); modal.style.display = "none"; }, 200);
         }
-        
         function submitAuth() {
             var pass = document.getElementById('auth-pass').value.trim();
             if(!pass) return showToast("Ingrese contraseña", true);
             
-            showModal("Procesando", "Verificando credenciales...", true);
-            document.getElementById('modal-icon').innerText = "⏳";
-
+            showLoader("Verificando credenciales...");
             google.script.run
                 .withSuccessHandler(function(res) {
-                    closeModal();
+                    hideLoader();
                     if(res.success) {
                         isAuthenticated = true; 
                         currentAuthPass = pass;
@@ -1068,19 +1021,18 @@
                         switchTab('ajustes');
                     } else showToast("Contraseña incorrecta", true);
                 })
-                .withFailureHandler(function() { closeModal(); showToast("Error de conexión", true); })
+                .withFailureHandler(function() { hideLoader(); showToast("Error de conexión", true); })
                 .verificarPassword(pass);
         }
         
         function cargarConfiguracion() {
+            showLoader("Cargando ajustes y mapa...");
             google.script.run
                 .withSuccessHandler(function(data) {
+                    hideLoader();
+                    
                     var horaStr = data.horaIngreso;
-                    if (horaStr && horaStr instanceof Date) {
-                        var hh = String(horaStr.getHours()).padStart(2, '0');
-                        var mm = String(horaStr.getMinutes()).padStart(2, '0');
-                        horaStr = hh + ':' + mm;
-                    } else if (horaStr && typeof horaStr === 'string' && horaStr.length > 5) {
+                    if (horaStr && typeof horaStr === 'string' && horaStr.length > 5) {
                         horaStr = horaStr.substring(0, 5);
                     }
                     
@@ -1098,6 +1050,7 @@
                     initMap(lat, lng);
                 })
                 .withFailureHandler(function(err) {
+                    hideLoader();
                     showToast("Error al cargar configuración", true);
                 })
                 .getConfig();
@@ -1113,10 +1066,10 @@
                 if (!mapInitialized) {
                     mapInstance = L.map('map-container').setView([lat, lng], 17);
                     
-                    L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+                    L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
                         maxZoom: 20,
                         subdomains:['mt0','mt1','mt2','mt3'],
-                        attribution: 'Map data © Google'
+                        attribution: 'Map data &copy; Google'
                     }).addTo(mapInstance);
                     
                     mapMarker = L.marker([lat, lng], {draggable: true}).addTo(mapInstance);
@@ -1144,12 +1097,10 @@
         }
 
         function centrarEnMiUbicacion() {
-            showModal("Ubicando", "Obteniendo coordenadas...", true);
-            document.getElementById('modal-icon').innerText = "📍";
-
+            showLoader("Ubicando tu dispositivo...");
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
-                    closeModal();
+                    hideLoader();
                     var lat = position.coords.latitude;
                     var lng = position.coords.longitude;
                     
@@ -1165,11 +1116,11 @@
                     }
                     showToast("Ubicación actualizada en el mapa");
                 }, function(error) {
-                    closeModal();
+                    hideLoader();
                     showToast("Permiso de ubicación denegado o no disponible.", true);
                 }, { enableHighAccuracy: true });
             } else {
-                closeModal();
+                hideLoader();
                 showToast("Tu navegador no soporta geolocalización.", true);
             }
         }
@@ -1191,26 +1142,21 @@
                 radio: parseInt(document.getElementById('conf-radio').value) || 15
             };
             
-            showModal("Guardando", "Aplicando cambios en el servidor...", true);
-            document.getElementById('modal-icon').innerText = "⏳";
-
+            showLoader("Guardando cambios en el servidor...");
             google.script.run
                 .withSuccessHandler(function(res) {
-                    closeModal();
+                    hideLoader();
                     if(res.success) {
                         showToast("Ajustes guardados correctamente");
                         if (nuevaPass !== "") currentAuthPass = nuevaPass; 
                         document.getElementById('conf-pass').value = ""; 
                     } else showToast(res.message, true);
                 })
-                .withFailureHandler(function() { closeModal(); showToast("Fallo de red", true); })
                 .saveConfig(currentAuthPass, data); 
         }
 
         window.onload = function() {
-            verificarAcceso(function() {
-                switchTab('escaner');
-            });
+            switchTab('escaner');
         };
     </script>
 </body>
