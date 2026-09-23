@@ -11,6 +11,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
+    <!-- ESCUDO DE SEGURIDAD GLOBAL PARA EVITAR CONGELAMIENTOS -->
     <script>
         window.onerror = function(msg, url, line) {
             console.error("Fallo detectado: ", msg, line);
@@ -188,7 +189,7 @@
 
     <main class="flex-grow flex flex-col p-5 max-w-lg mx-auto w-full relative">
         
-        <!-- PESTAÑA 1: ESCÁNER GPS (Modificado para cámara en vivo) -->
+        <!-- PESTAÑA 1: ESCÁNER GPS -->
         <section id="view-escaner" class="flex-grow flex flex-col items-center justify-center">
             <div class="text-center mb-8">
                 <h2 class="text-2xl font-black text-slate-900 dark:text-white mb-2">Marcar Ingreso</h2>
@@ -535,7 +536,7 @@
 
             var btn = document.getElementById('btn-gps'); 
             var originalText = btn.innerText;
-            btn.innerText = "Calculando ubicación..."; 
+            btn.innerText = "Calculando coordenadas..."; 
             btn.disabled = true; 
             btn.classList.add('opacity-70');
 
@@ -567,8 +568,8 @@
                             btn.innerText = originalText; 
                             btn.disabled = false; 
                             btn.classList.remove('opacity-70');
-                            infoText.innerHTML += '<span class="text-red-600 font-bold mt-1 block">Estás demasiado lejos de la oficina.</span>';
-                            showModal("Acceso Denegado", "Estás fuera del perímetro de trabajo permitido. Acércate a la puerta de ingreso para marcar.", false);
+                            infoText.innerHTML += '<span class="text-red-600 font-bold mt-1 block">Fuera de la oficina.</span>';
+                            showModal("Acceso Denegado", "Estás demasiado lejos de la zona permitida para marcar tu ingreso. Acércate más a la puerta de la oficina.", false);
                         }
                     },
                     function(error) {
@@ -591,47 +592,22 @@
 
         var html5QrCode = null;
         var isProcessingScan = false;
-        
-        function reiniciarInterfazScanner() {
-            var pasoGps = document.getElementById('paso-gps');
-            if(pasoGps) {
-                pasoGps.classList.remove('hidden'); 
-                document.getElementById('paso-camara').classList.add('hidden');
-                document.getElementById('gps-info-panel').classList.add('opacity-0', 'translate-y-4'); 
-                
-                var btnFoto = document.getElementById('btn-foto-manual');
-                if(btnFoto) btnFoto.classList.add('hidden');
-
-                var uploadInp = document.getElementById('qr-upload-emp');
-                if(uploadInp) uploadInp.value = ''; 
-                
-                var btn = document.getElementById('btn-gps');
-                if(btn) { 
-                    btn.innerText = "Toque para iniciar GPS"; 
-                    btn.disabled = false; 
-                    btn.classList.remove('opacity-70'); 
-                }
-
-                detenerScanner();
-            }
-        }
-
-        function habilitarPasoQR() {
-            document.getElementById('paso-gps').classList.add('hidden'); 
-            document.getElementById('paso-camara').classList.remove('hidden');
-            var btnFoto = document.getElementById('btn-foto-manual');
-            if(btnFoto) btnFoto.classList.remove('hidden');
-            activarCamaraReal(); // Inicia la camara automaticamente al pasar el GPS
-        }
 
         function activarCamaraReal() {
             var uiContainer = document.getElementById('scanner-ui');
+            var readerContainer = document.getElementById('reader'); // Elemento donde va el video
+            
             uiContainer.innerHTML = '<div class="flex flex-col items-center">' +
                                     '<svg class="animate-spin h-10 w-10 text-brand-blue dark:text-white mb-4 drop-shadow-md" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>' +
                                     '<span class="text-white font-bold text-sm tracking-widest uppercase drop-shadow-md text-center">Iniciando Cámara...<br/><span class="text-xs font-normal capitalize text-slate-400">Por favor, acepta los permisos.</span></span>' +
                                     '</div>';
             
-            if (!html5QrCode) { html5QrCode = new Html5Qrcode("reader"); }
+            // ¡LA SOLUCIÓN! Le quitamos lo invisible al contenedor para que se vea el video en lugar del recuadro blanco
+            readerContainer.classList.remove('hidden');
+            
+            if (!html5QrCode) { 
+                html5QrCode = new Html5Qrcode("reader"); 
+            }
             var config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
             
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, undefined)
@@ -652,6 +628,7 @@
                         document.getElementById('scanner-laser').classList.remove('hidden');
                     }).catch(function(finalErr) {
                         console.error("Error de cámara:", finalErr);
+                        readerContainer.classList.add('hidden'); // Lo volvemos a ocultar si falló
                         uiContainer.innerHTML = '<div class="text-center">' +
                                                 '<span class="text-5xl mb-4 block">🚫</span>' +
                                                 '<p class="text-white font-bold mb-2 text-lg">Cámara Bloqueada</p>' +
@@ -662,16 +639,63 @@
                 });
         }
 
+        function detenerScanner() {
+            if (html5QrCode) {
+                try {
+                    var isScanning = typeof html5QrCode.getState === 'function' ? (html5QrCode.getState() === 2) : html5QrCode.isScanning;
+                    if (isScanning) {
+                        html5QrCode.stop().then(function() {
+                            html5QrCode.clear(); 
+                            html5QrCode = null;
+                        }).catch(function(e) { html5QrCode.clear(); html5QrCode = null; });
+                    } else {
+                        html5QrCode.clear(); 
+                        html5QrCode = null;
+                    }
+                } catch(e) { html5QrCode = null; }
+            }
+            var laser = document.getElementById('scanner-laser');
+            if (laser) laser.classList.add('hidden');
+
+            // Volver a ocultar el contenedor del video cuando se detenga
+            var readerContainer = document.getElementById('reader');
+            if (readerContainer) readerContainer.classList.add('hidden');
+        }
+        
+        function reiniciarInterfazScanner() {
+            var pasoGps = document.getElementById('paso-gps');
+            if(pasoGps) {
+                pasoGps.classList.remove('hidden'); 
+                document.getElementById('paso-camara').classList.add('hidden');
+                document.getElementById('gps-info-panel').classList.add('opacity-0', 'translate-y-4'); 
+                document.getElementById('qr-upload-emp').value = ''; 
+                var btn = document.getElementById('btn-gps');
+                if(btn) { 
+                    btn.innerText = "Toque para iniciar GPS"; 
+                    btn.disabled = false; 
+                    btn.classList.remove('opacity-70'); 
+                }
+            }
+            detenerScanner(); // Asegurarnos de detener la camara si estaba encendida
+        }
+
+        function habilitarPasoQR() {
+            document.getElementById('paso-gps').classList.add('hidden'); 
+            document.getElementById('paso-camara').classList.remove('hidden');
+        }
+
         function procesarFotoQR(event) {
             if (!event.target.files || event.target.files.length === 0) return;
             var archivoImagen = event.target.files[0];
+            
+            // Usamos la misma instancia o creamos una si no existe
             if (!html5QrCode) { html5QrCode = new Html5Qrcode("reader"); }
             
             showLoader("Analizando foto...");
             html5QrCode.scanFile(archivoImagen, true)
                 .then(function(textoQR) { 
                     hideLoader(); 
-                    onScanSuccess(textoQR); 
+                    enviarMarcacionAlServidor(textoQR); 
                     document.getElementById('qr-upload-emp').value = ''; 
                 })
                 .catch(function(err) { 
@@ -681,40 +705,32 @@
                 });
         }
 
-        function detenerScanner() {
-            if (html5QrCode) {
-                try {
-                    var isScanning = typeof html5QrCode.getState === 'function' ? (html5QrCode.getState() === 2) : html5QrCode.isScanning;
-                    if (isScanning) {
-                        html5QrCode.stop().then(function() {
-                            html5QrCode.clear(); html5QrCode = null;
-                        }).catch(function(e) { html5QrCode.clear(); html5QrCode = null; });
-                    } else {
-                        html5QrCode.clear(); html5QrCode = null;
-                    }
-                } catch(e) { html5QrCode = null; }
-            }
-            var laser = document.getElementById('scanner-laser');
-            if (laser) laser.classList.add('hidden');
-        }
-
         function onScanSuccess(decodedText) {
             if (isProcessingScan) return;
             isProcessingScan = true;
-            showLoader("Guardando asistencia en la nube...");
-            
+            enviarMarcacionAlServidor(decodedText);
+        }
+
+        function enviarMarcacionAlServidor(qrTexto) {
+            showLoader("Guardando en la nube...");
             google.script.run
                 .withSuccessHandler(function(res) {
-                    hideLoader();
+                    hideLoader(); 
                     showModal(res.success ? "Ingreso Exitoso" : "Rechazado", res.message, res.success); 
-                    setTimeout(function() { isProcessingScan = false; reiniciarInterfazScanner(); }, 3500); 
+                    setTimeout(function() { 
+                        isProcessingScan = false;
+                        reiniciarInterfazScanner(); 
+                    }, 3500); 
                 })
                 .withFailureHandler(function() {
                     hideLoader(); 
                     showModal("Error de Conexión", "Problema al enviar los datos a la nube.", false); 
-                    setTimeout(function() { isProcessingScan = false; reiniciarInterfazScanner(); }, 3500);
+                    setTimeout(function() { 
+                        isProcessingScan = false;
+                        reiniciarInterfazScanner(); 
+                    }, 3500);
                 })
-                .registrarAsistenciaQR(decodedText.trim());
+                .registrarAsistenciaQR(qrTexto.trim());
         }
 
         function getStyleClassForId(id) {
@@ -775,6 +791,7 @@
                 .obtenerTareoHoy();
         }
 
+        // ARRANQUE SEGURO: Usamos el manejador window.addEventListener para evitar pisar otras funciones
         window.addEventListener('load', function() { 
             verificarAcceso(function() {
                 try {
