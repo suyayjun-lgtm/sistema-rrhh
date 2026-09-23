@@ -24,7 +24,7 @@
     <!-- ========================================================================= -->
     <script>
         // 🛑🛑 ¡ATENCIÓN! PEGA AQUÍ TU URL DE IMPLEMENTACIÓN DE GOOGLE APPS SCRIPT 🛑🛑
-        var URL_BACKEND_GOOGLE = "https://script.google.com/macros/s/AKfycbz8UF_RaTANwN9H1KqrdWlVxwETJWjaiWZtkekRuKyAqqnH7WuxXCrIGDc-0RFmNamgyg/exec";
+        var URL_BACKEND_GOOGLE = "https://script.google.com/macros/s/AKfycbxRNorCw4CyFvfmtS7K2vXqK8KqdAg2UmyNWB8rdPL68gJorRXPfDhI6ATjRK3Df8lZXQ/exec";
 
         window.google = {
             script: {
@@ -38,7 +38,7 @@
                         form.append('accion', accion);
                         form.append('payload', JSON.stringify(payload));
                         
-                        fetch(URL_BACKEND_GOOGLE, { method: 'POST', body: form })
+                        fetch(URL_BACKEND_GOOGLE, { method: 'POST', body: JSON.stringify({accion: accion, payload: payload}), headers: {"Content-Type": "text/plain;charset=utf-8"} })
                         .then(function(r) { return r.json(); })
                         .then(function(data) { if (self._success) self._success(data); })
                         .catch(function(err) { if (self._failure) self._failure(err); });
@@ -484,6 +484,30 @@
                 '</div>';
         }
 
+        var LEYENDA = [
+            { id: '-', label: 'Sin Marcar', color: 'bg-[#f8fafc] dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700' },
+            { id: 'A', label: 'Asistió', color: 'bg-[#f0fdf4] dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800' },
+            { id: 'T', label: 'Tarde', color: 'bg-[#fefce8] dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800' },
+            { id: 'F', label: 'Falta / Inasistencia', color: 'bg-[#fef2f2] dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800' },
+            { id: 'DL', label: 'Día Libre', color: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800' },
+            { id: 'V', label: 'Vacaciones', color: 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800' },
+            { id: 'DM', label: 'Descanso Médico', color: 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-800' },
+            { id: 'LF', label: 'Lic. Fallecimiento', color: 'bg-gray-100 dark:bg-gray-800/80 text-gray-700 dark:text-gray-400 border-gray-300 dark:border-gray-700' },
+            { id: 'LP', label: 'Lic. Paternidad', color: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800' },
+            { id: 'S', label: 'Suspensión', color: 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800' },
+            { id: 'PS', label: 'Permiso S/Goce', color: 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-800' },
+            { id: 'PC', label: 'Permiso C/Goce', color: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' },
+            { id: 'AB', label: 'Abandono', color: 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-300 border-slate-400 dark:border-slate-600' },
+            { id: 'R', label: 'Retiro', color: 'bg-slate-800 dark:bg-slate-900 text-white border-slate-900 dark:border-black' }
+        ];
+
+        function getStyleClassForId(id) {
+            for(var i=0; i<LEYENDA.length; i++) {
+                if(LEYENDA[i].id === id) return LEYENDA[i].color;
+            }
+            return LEYENDA[0].color;
+        }
+
         var CONFIG_UBICACION = null;
 
         function calcularDistancia(lat1, lon1, lat2, lon2) {
@@ -558,18 +582,16 @@
                     function(position) {
                         clearTimeout(geoTimeout);
                         var distancia = calcularDistancia(position.coords.latitude, position.coords.longitude, CONFIG_UBICACION.LATITUD, CONFIG_UBICACION.LONGITUD);
-                        
-                        infoText.innerHTML = "Ubicación verificada.<br>";
 
                         if (distancia <= CONFIG_UBICACION.RADIO) {
-                            infoText.innerHTML += '<span class="text-green-600 font-bold mt-1 block">Estás en la oficina. Habilitando Escáner...</span>';
+                            infoText.innerHTML = '<span class="text-green-600 font-bold block">Ubicación Correcta. Habilitando Escáner...</span>';
                             setTimeout(function() { habilitarPasoQR(); }, 1500);
                         } else {
                             btn.innerText = originalText; 
                             btn.disabled = false; 
                             btn.classList.remove('opacity-70');
-                            infoText.innerHTML += '<span class="text-red-600 font-bold mt-1 block">Fuera de la oficina.</span>';
-                            showModal("Acceso Denegado", "Estás demasiado lejos de la zona permitida para marcar tu ingreso. Acércate más a la puerta de la oficina.", false);
+                            infoText.innerHTML = '<span class="text-red-600 font-bold block">Estás demasiado lejos de la oficina.</span>';
+                            showModal("Acceso Denegado", "Debes estar en la oficina para marcar tu ingreso. Acércate más a la puerta.", false);
                         }
                     },
                     function(error) {
@@ -592,17 +614,52 @@
 
         var html5QrCode = null;
         var isProcessingScan = false;
+        var myAudioContext = null;
+
+        function emitirSonidoBeep() {
+            try {
+                if (!myAudioContext) {
+                    myAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (myAudioContext.state === 'suspended') {
+                    myAudioContext.resume();
+                }
+                
+                var oscillator = myAudioContext.createOscillator();
+                var gainNode = myAudioContext.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 880;
+                
+                gainNode.gain.setValueAtTime(0.1, myAudioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, myAudioContext.currentTime + 0.1);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(myAudioContext.destination);
+                
+                oscillator.start(myAudioContext.currentTime);
+                oscillator.stop(myAudioContext.currentTime + 0.1);
+            } catch(e) {
+                console.log("No se pudo reproducir el sonido: ", e);
+            }
+        }
 
         function activarCamaraReal() {
+            if (!myAudioContext) {
+                myAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (myAudioContext.state === 'suspended') {
+                myAudioContext.resume();
+            }
+
             var uiContainer = document.getElementById('scanner-ui');
-            var readerContainer = document.getElementById('reader'); // Elemento donde va el video
+            var readerContainer = document.getElementById('reader');
             
             uiContainer.innerHTML = '<div class="flex flex-col items-center">' +
                                     '<svg class="animate-spin h-10 w-10 text-brand-blue dark:text-white mb-4 drop-shadow-md" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>' +
                                     '<span class="text-white font-bold text-sm tracking-widest uppercase drop-shadow-md text-center">Iniciando Cámara...<br/><span class="text-xs font-normal capitalize text-slate-400">Por favor, acepta los permisos.</span></span>' +
                                     '</div>';
             
-            // ¡LA SOLUCIÓN! Le quitamos lo invisible al contenedor para que se vea el video en lugar del recuadro blanco
             readerContainer.classList.remove('hidden');
             
             if (!html5QrCode) { 
@@ -628,7 +685,7 @@
                         document.getElementById('scanner-laser').classList.remove('hidden');
                     }).catch(function(finalErr) {
                         console.error("Error de cámara:", finalErr);
-                        readerContainer.classList.add('hidden'); // Lo volvemos a ocultar si falló
+                        readerContainer.classList.add('hidden');
                         uiContainer.innerHTML = '<div class="text-center">' +
                                                 '<span class="text-5xl mb-4 block">🚫</span>' +
                                                 '<p class="text-white font-bold mb-2 text-lg">Cámara Bloqueada</p>' +
@@ -657,7 +714,6 @@
             var laser = document.getElementById('scanner-laser');
             if (laser) laser.classList.add('hidden');
 
-            // Volver a ocultar el contenedor del video cuando se detenga
             var readerContainer = document.getElementById('reader');
             if (readerContainer) readerContainer.classList.add('hidden');
         }
@@ -676,7 +732,7 @@
                     btn.classList.remove('opacity-70'); 
                 }
             }
-            detenerScanner(); // Asegurarnos de detener la camara si estaba encendida
+            detenerScanner(); 
         }
 
         function habilitarPasoQR() {
@@ -688,19 +744,19 @@
             if (!event.target.files || event.target.files.length === 0) return;
             var archivoImagen = event.target.files[0];
             
-            // Usamos la misma instancia o creamos una si no existe
             if (!html5QrCode) { html5QrCode = new Html5Qrcode("reader"); }
             
-            showLoader("Analizando foto...");
+            showModal("Procesando", "Analizando código en la imagen...", true);
+            document.getElementById('modal-icon').innerText = "⏳";
+            
             html5QrCode.scanFile(archivoImagen, true)
                 .then(function(textoQR) { 
-                    hideLoader(); 
-                    enviarMarcacionAlServidor(textoQR); 
+                    closeModal();
+                    onScanSuccess(textoQR);
                     document.getElementById('qr-upload-emp').value = ''; 
                 })
                 .catch(function(err) { 
-                    hideLoader(); 
-                    showModal("QR no encontrado", "Intenta tomar la foto más cerca y con buena luz.", false); 
+                    showModal("Foto inválida", "No se detectó un código QR. Intente de nuevo.", false); 
                     document.getElementById('qr-upload-emp').value = ''; 
                 });
         }
@@ -708,14 +764,14 @@
         function onScanSuccess(decodedText) {
             if (isProcessingScan) return;
             isProcessingScan = true;
-            enviarMarcacionAlServidor(decodedText);
-        }
+            
+            emitirSonidoBeep();
 
-        function enviarMarcacionAlServidor(qrTexto) {
-            showLoader("Guardando en la nube...");
+            showModal("Procesando", "Verificando credencial en el servidor...", true);
+            document.getElementById('modal-icon').innerText = "⏳";
+
             google.script.run
                 .withSuccessHandler(function(res) {
-                    hideLoader(); 
                     showModal(res.success ? "Ingreso Exitoso" : "Rechazado", res.message, res.success); 
                     setTimeout(function() { 
                         isProcessingScan = false;
@@ -723,24 +779,13 @@
                     }, 3500); 
                 })
                 .withFailureHandler(function() {
-                    hideLoader(); 
                     showModal("Error de Conexión", "Problema al enviar los datos a la nube.", false); 
                     setTimeout(function() { 
                         isProcessingScan = false;
                         reiniciarInterfazScanner(); 
                     }, 3500);
                 })
-                .registrarAsistenciaQR(qrTexto.trim());
-        }
-
-        function getStyleClassForId(id) {
-            var dict = {
-                'A': { border: 'border-green-500/30', bg: 'bg-green-50 dark:bg-green-900/10', text: 'text-green-700 dark:text-green-400', badge: 'bg-green-500' },
-                'T': { border: 'border-yellow-500/30', bg: 'bg-yellow-50 dark:bg-yellow-900/10', text: 'text-yellow-700 dark:text-yellow-400', badge: 'bg-yellow-500' },
-                'F': { border: 'border-red-500/30', bg: 'bg-red-50 dark:bg-red-900/10', text: 'text-red-700 dark:text-red-400', badge: 'bg-red-500' },
-                '-': { border: 'border-slate-200 dark:border-slate-700', bg: 'bg-slate-50 dark:bg-slate-800/40', text: 'text-slate-500 dark:text-slate-400', badge: 'bg-slate-300 dark:bg-slate-600' }
-            }; 
-            return dict[id] || { border: 'border-purple-500/30', bg: 'bg-purple-50 dark:bg-purple-900/10', text: 'text-purple-700 dark:text-purple-400', badge: 'bg-purple-500' };
+                .registrarAsistenciaQR(decodedText.trim());
         }
 
         function cargarHistorial() {
@@ -771,9 +816,14 @@
                         } else if(emp.estado === 'A' && emp.rawEstado.includes(' ')) {
                             extratime = '<p class="mt-1 text-[10px] text-green-600 font-mono opacity-80">Hora: ' + emp.rawEstado.split(' ')[1] + '</p>';
                         }
+
+                        var trClass = "card-neo p-4 border-l-4 " + estilo.border + " flex items-center justify-between";
+                        if (emp.estado === 'R' || emp.estado === 'AB') {
+                            trClass += " opacity-60 grayscale bg-slate-50 dark:bg-slate-900/50";
+                        }
                         
                         container.innerHTML += 
-                            '<div class="card-neo p-4 border-l-4 ' + estilo.border + ' flex items-center justify-between">' +
+                            '<div class="' + trClass + '">' +
                                 '<div class="flex items-center gap-3">' +
                                     '<div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-xs shrink-0">' + iniciales + '</div>' +
                                     '<div class="flex flex-col"><span class="font-bold text-[13px]">' + emp.nombres + '</span><span class="text-[10px] text-slate-500 truncate max-w-[150px]">' + emp.cargo + '</span></div>' +
@@ -791,7 +841,6 @@
                 .obtenerTareoHoy();
         }
 
-        // ARRANQUE SEGURO: Usamos el manejador window.addEventListener para evitar pisar otras funciones
         window.addEventListener('load', function() { 
             verificarAcceso(function() {
                 try {
