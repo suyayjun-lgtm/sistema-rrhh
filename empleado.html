@@ -21,7 +21,7 @@
 
     <script>
         // 🛑🛑 ¡ATENCIÓN! PEGA AQUÍ LA MISMA URL QUE EN EL INDEX 🛑🛑
-        var URL_BACKEND_GOOGLE = "https://script.google.com/macros/s/AKfycbxoMFfQlHY0NltFLetczpcTo9voHdLwvZkj_l6unGVgwQu005WuKn26jyhbo2A83grRnQ/exec";
+        var URL_BACKEND_GOOGLE = "https://script.google.com/macros/s/AKfycbzrJsvaNnTqCkQ1RKXo3vGa114mOQCZvLYuimvhcp_PTvtJ6EqsV3mRtMQXzZe_ufiFzg/exec";
 
         window.google = {
             script: {
@@ -310,7 +310,10 @@
     <nav class="fixed bottom-0 left-0 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 pb-safe z-50">
         <div class="max-w-md mx-auto flex justify-around items-center p-3">
             <button onclick="switchTabSafe('escaner')" id="tab-escaner" class="nav-item active flex-1 py-1">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
                 <span>Escanear</span>
             </button>
             <button onclick="switchTabSafe('historial')" id="tab-historial" class="nav-item flex-1 py-1">
@@ -381,7 +384,9 @@
             overlay.classList.remove('flex');
         }
 
-        // TABS BLINDADOS GLOBALMENTE
+        // TABS BLINDADOS GLOBALMENTE CON MEMORIA CACHÉ
+        var isHistorialCargado = false;
+
         window.switchTabSafe = function(viewId) {
             try {
                 var tabs = ['escaner', 'historial', 'mi-tareo'];
@@ -398,7 +403,11 @@
                 if(activeView) { activeView.classList.remove('hidden'); }
                 if(activeTab) { activeTab.classList.add('active'); }
 
-                if (viewId === 'historial') { cargarHistorial(); }
+                if (viewId === 'historial') {
+                    if (!isHistorialCargado) {
+                        cargarHistorial();
+                    }
+                }
                 else if (viewId === 'escaner') { reiniciarInterfazScanner(); }
                 else { detenerScannerEmpleado(); }
             } catch(e) { 
@@ -513,6 +522,7 @@
                 oscillator.type = 'square'; 
                 oscillator.frequency.value = 900; 
                 
+                // Volumen ALTO (1.0 = 100%)
                 gainNode.gain.setValueAtTime(1.0, myAudioContext.currentTime); 
                 gainNode.gain.exponentialRampToValueAtTime(0.01, myAudioContext.currentTime + 0.15); 
                 
@@ -693,7 +703,7 @@
                 motorLector = new Html5Qrcode("reader-emp");
             }
 
-            // Aceleración de cámara a 20 FPS
+            // OPTIMIZACIÓN: Aceleración de cámara a 20 FPS para captura rápida
             var config = { fps: 20, qrbox: { width: 250, height: 250 } };
             
             motorLector.start({ facingMode: "environment" }, config, onScanSuccessEmpleado, undefined)
@@ -770,7 +780,7 @@
                 })
                 .withFailureHandler(function() {
                     hideLoader(); 
-                    showModal("Error de Conexión", "Problema al enviar los datos a la nube.", false); 
+                    showModal("Error de Conexión", "Problema al enviar los datos a la nube. Verifica tu red.", false); 
                     setTimeout(function() { 
                         isProcessingScan = false;
                         reiniciarInterfazScanner(); 
@@ -797,6 +807,7 @@
             
             google.script.run
                 .withSuccessHandler(function(empleados) {
+                    isHistorialCargado = true; // MEMORIA PARA NO RECARGAR ETERNAMENTE
                     container.innerHTML = '';
                     if(!empleados || empleados.length === 0) { 
                         container.innerHTML = '<div class="card-neo p-8 text-center text-slate-500 font-medium text-sm border-dashed">No hay registros hoy.</div>'; 
@@ -840,12 +851,12 @@
                     }
                 })
                 .withFailureHandler(function() { 
-                    container.innerHTML = '<div class="card-neo p-8 text-center text-red-500 text-sm">Error de red. Asegúrate de tener conexión.</div>'; 
+                    container.innerHTML = '<div class="card-neo p-8 text-center text-red-500 text-sm">Error de red. Asegúrate de tener conexión y vuelve a intentar.</div>'; 
                 })
                 .obtenerTareoHoy();
         }
 
-        // ARRANQUE SEGURO: Usamos el manejador window.addEventListener para evitar pisar otras funciones
+        // ARRANQUE SEGURO
         window.addEventListener('load', function() { 
             try {
                 verificarAcceso(function() {
