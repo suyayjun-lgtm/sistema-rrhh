@@ -20,7 +20,7 @@
     <!-- ========================================================================= -->
     <script>
         // 🛑🛑 ¡ATENCIÓN! PEGA AQUÍ TU URL DE IMPLEMENTACIÓN DE GOOGLE APPS SCRIPT 🛑🛑
-        var URL_BACKEND_GOOGLE = "https://script.google.com/macros/s/AKfycbw1c07-3Ww5ArFA16GeK14dwtzMeOq4Xw7vg9-voXHCabL_cAG9ymSyabAbs7amqhtSWQ/exec";
+        var URL_BACKEND_GOOGLE = "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnTSHZiqobc_vfSghKHTEZLzrc6oW7gjJBzPFb_tqb8f1x_VfamXfNVpMqXrM-VEpqgVTsEb3eVIHVdkZe963cCgdd3oAIY57hPQ0uGLkQKpv0XwUZjYCfkil7KgiTFQxEiHFIrEkOSYT0ConhBbs7zL67ABTp3HgJBQC9YKnNBpatHCw-LlpbslcOedh0RKOTkoefOGDDLuQtNVCFNyseNAEKh-KVrFp-llFPcOz7Csp8WsedC9v4v9XZXVfV6UoXTOr_Ffr6bh6SF2cUB-WXN_56DUmw&lib=MUIR5YYgdOZyhYjZKlug3r3GwXjUmlyGe";
 
         window.google = {
             script: {
@@ -42,7 +42,7 @@
                     getConfig: function() { this._callApi('getConfig'); },
                     registrarAsistenciaQR: function(qr) { this._callApi('registrarAsistenciaQR', { qr: qr }); },
                     obtenerTareoHoy: function() { this._callApi('obtenerTareoHoy'); },
-                    obtenerMiTareoMensual: function(dni, offset) { this._callApi('obtenerMiTareoMensual', { dni: dni, offset: offset }); },
+                    obtenerMiTareoMensual: function(dni, offset) { this._callApi('obtenerMiTareoMensual', { dni: offset }); },
                     registrarEmpleado: function(data) { this._callApi('registrarEmpleado', { data: data }); },
                     actualizarEstadoManual: function(dni, estado) { this._callApi('actualizarEstadoManual', { dni: dni, estado: estado }); },
                     obtenerReporteMensual: function() { this._callApi('obtenerReporteMensual'); },
@@ -53,7 +53,6 @@
             }
         };
 
-        // Lógica de Bloqueo desde GitHub
         function verificarAcceso(callback) {
             document.getElementById('loader-text').innerText = "Verificando licencia...";
             document.getElementById('loader-overlay').classList.remove('hidden');
@@ -65,7 +64,28 @@
                     document.getElementById('loader-overlay').classList.remove('flex');
                     
                     if (licencia && licencia.estado === 'SUSPENDIDO') {
-                        document.body.innerHTML = '<div style="font-family: Arial, sans-serif; text-align:center; padding:40px 20px; background-color:#0f172a; color:white; height:100vh; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; align-items:center;"><div style="background:#1e293b; padding:40px; border-radius:16px; max-width:400px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"><div style="font-size:48px; margin-bottom:10px;">🔒</div><h1 style="color:#ef4444; margin-top:0; font-size:24px;">Suscripción Vencida</h1><p style="color:#94a3b8; font-size:14px; line-height:1.6;">El acceso a este sistema ha sido restringido. Por favor, regularice su suscripción.</p><div style="margin-top:30px; padding-top:20px; border-top:1px solid #334155;"><p style="margin:0; color:#cbd5e1; font-size:13px;">Comunícate con soporte:</p><h3 style="margin:5px 0 0 0; color:#3b82f6;">MAS Digital</h3></div></div></div>';
+                        document.body.innerHTML = `
+                        <div style="font-family: 'Inter', sans-serif; text-align:center; padding:40px 20px; background-color:#0f172a; color:white; height:100vh; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                            <div style="background:#1e293b; padding:40px; border-radius:24px; max-width:420px; width: 100%; border: 1px solid #334155; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+                                <div style="display:flex; justify-content:center; align-items:center; margin-bottom: 25px;">
+                                    <svg viewBox="0 0 280 150" style="height: 40px; width: auto;" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g1s" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2563EB"/><stop offset="100%" stop-color="#8B5CF6"/></linearGradient><linearGradient id="g2s" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#EC4899"/></linearGradient><linearGradient id="g3s" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#EC4899"/><stop offset="100%" stop-color="#F97316"/></linearGradient></defs><g stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 32 110 L 32 65 A 34 34 0 0 1 100 65 L 100 110" stroke="url(#g1s)" stroke-width="32" /><path d="M 100 110 L 100 65 A 34 34 0 0 1 168 65 L 168 110" stroke="url(#g2s)" stroke-width="32" /><path d="M 229 13.2 L 229 53.2 M 209 33.2 L 249 33.2" stroke="url(#g3s)" stroke-width="24" /></g></svg>
+                                    <span style="font-weight: 900; font-size: 26px; margin-left: 10px; letter-spacing: -1px; font-family:'Montserrat', sans-serif;">MAS</span>
+                                    <span style="font-weight: 700; font-size: 26px; margin-left: 4px; letter-spacing: -1px; font-family:'Montserrat', sans-serif;">Digital</span>
+                                    <span style="width: 8px; height: 8px; background: #F97316; border-radius: 50%; margin-left: 4px;"></span>
+                                </div>
+                                <div style="width: 70px; height: 70px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                                    <span style="font-size:32px;">🔒</span>
+                                </div>
+                                <h1 style="color:#ef4444; margin-top:0; margin-bottom: 12px; font-size:24px; font-weight: 800;">Suscripción Vencida</h1>
+                                <p style="color:#94a3b8; font-size:14px; line-height:1.6; margin-bottom: 30px;">El acceso a este sistema ha sido restringido por falta de pago. Por favor, regularice su suscripción para reactivar el servicio.</p>
+                                <div style="padding-top:20px; border-top:1px solid #334155; display:flex; flex-direction:column; gap:10px;">
+                                    <p style="margin:0; color:#cbd5e1; font-size:12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Contacto de Soporte</p>
+                                    <a href="https://wa.me/51931355694" target="_blank" style="display:inline-flex; align-items:center; justify-content:center; gap:8px; background:#2563EB; color:white; padding:14px 20px; border-radius:12px; text-decoration:none; font-weight:700; font-size:16px; transition: all 0.2s;">
+                                        📞 931 355 694
+                                    </a>
+                                </div>
+                            </div>
+                        </div>`;
                         return;
                     }
                     if (licencia && licencia.estado === 'AVISO' && licencia.mensaje) {
@@ -148,7 +168,7 @@
         select option { background-color: #ffffff; color: #0f172a; font-weight: 500; }
         .dark select option { background-color: #1e293b; color: #f8fafc; }
         
-        /* Contenedor del mapa - Altura fija obligatoria para Leaflet */
+        /* Contenedor del mapa */
         #map-container { height: 350px; width: 100%; border-radius: 0.75rem; z-index: 10; border: 1px solid #e2e8f0; }
         .dark #map-container { border-color: #334155; }
     </style>
@@ -208,8 +228,13 @@
                         <path d="M 229 13.2 L 229 53.2 M 209 33.2 L 249 33.2" stroke="url(#g3)" stroke-width="24" />
                     </g>
                 </svg>
-                <div class="flex items-baseline mt-1">
-                    <span class="font-display font-[900] text-3xl leading-none text-slate-900 dark:text-white tracking-tighter">WORKSPACE</span>
+                <div class="flex flex-col mt-1">
+                    <div class="flex items-baseline leading-none">
+                        <span class="font-display font-[900] text-2xl text-slate-900 dark:text-white tracking-tighter">MAS</span>
+                        <span class="font-display font-[700] text-2xl text-slate-900 dark:text-white tracking-tighter ml-1">Digital</span>
+                        <span class="w-2.5 h-2.5 bg-brand-orange rounded-full ml-1 relative top-[-1px]"></span>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 block">Portal Admin</span>
                 </div>
             </div>
 
@@ -641,6 +666,7 @@
            ========================================================================= */
         var html5QrCode = null;
         var isProcessingScan = false;
+        
         var myAudioContext = null;
 
         function emitirSonidoBeep() {
@@ -690,7 +716,7 @@
         }
 
         function activarCamaraReal() {
-            // Inicializar AudioContext aquí con la interacción del usuario es vital para Safari iOS
+            // Activar AudioContext con interacción del usuario (requisito de iOS)
             if (!myAudioContext) {
                 myAudioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
@@ -792,7 +818,6 @@
             if (isProcessingScan) return;
             isProcessingScan = true;
             
-            // Emitir sonido al detectar
             emitirSonidoBeep();
 
             showModal("Procesando", "Verificando credencial en el servidor...", true);
@@ -893,11 +918,11 @@
 
                     for(var i=0; i<empleados.length; i++) {
                         var emp = empleados[i];
-                        if(emp.estado === 'A') asis++;
+                        if(emp.estado === 'A' || emp.estado === 'T') asis++;
                         else if(emp.estado === 'F' || emp.estado === '-') faltas++;
-                        else if (emp.estado !== 'R' && emp.estado !== 'AB') exc++; // No sumar retirados a excepciones
+                        else if(emp.estado !== 'AB' && emp.estado !== 'R') exc++; // No contamos Retiros ni Abandonos en Excepciones
 
-                        // Pintar fila entera si es retiro o abandono
+                        // Pintar fila entera gris transparente si es Retiro o Abandono
                         var trClass = "hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors bg-white dark:bg-slate-900";
                         if (emp.estado === 'R' || emp.estado === 'AB') {
                             trClass = "bg-slate-50 dark:bg-slate-900/50 opacity-60 grayscale";
@@ -968,9 +993,9 @@
                 .withSuccessHandler(function(res) {
                     if(res.success) {
                         showToast("Estado Actualizado.");
-                        // Recargar tabla visualmente para aplicar filtro gris si es R o AB
-                        if(nuevoEstado === 'R' || nuevoEstado === 'AB' || selectElement.parentElement.parentElement.parentElement.classList.contains('grayscale')) {
-                             cargarTareoHoy();
+                        // Recargar la tabla si elegimos Abandono o Retiro para que aplique el color gris a la fila
+                        if (nuevoEstado === 'R' || nuevoEstado === 'AB' || selectElement.parentElement.parentElement.parentElement.classList.contains('grayscale')) {
+                            cargarTareoHoy();
                         }
                     }
                     else showToast("No se pudo guardar.", true);
@@ -1013,7 +1038,7 @@
                                 '<span class="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-purple-50 dark:bg-purple-900/20 text-brand-purple font-black text-sm">' + emp.justificados + '</span>' +
                             '</td>' +
                             '<td class="py-4 px-6 text-center border-b border-slate-100 dark:border-slate-800/80">' +
-                                '<span class="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-500 font-black text-sm font-mono tracking-tighter">' + emp.tardanzas + '</span>' +
+                                '<span class="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-500 font-black text-sm font-mono tracking-tighter">' + emp.minutosTarde + '</span>' +
                             '</td>';
                         tbody.appendChild(tr);
                     }
