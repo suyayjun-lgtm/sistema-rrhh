@@ -20,7 +20,7 @@
     <!-- ========================================================================= -->
     <script>
         // 🛑🛑 ¡ATENCIÓN! PEGA AQUÍ TU URL DE IMPLEMENTACIÓN DE GOOGLE APPS SCRIPT 🛑🛑
-        var URL_BACKEND_GOOGLE = "https://script.google.com/macros/s/AKfycbzrJsvaNnTqCkQ1RKXo3vGa114mOQCZvLYuimvhcp_PTvtJ6EqsV3mRtMQXzZe_ufiFzg/exec";
+        var URL_BACKEND_GOOGLE = "https://script.google.com/macros/s/AKfycbxGOgcu_Xf5s043N4GxKSwoMctIpauv5e2ozVx1KPk7f6vUg-eqfRI17HkILmG8icfMUA/exec";
 
         window.google = {
             script: {
@@ -612,9 +612,13 @@
         if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
         else document.documentElement.classList.remove('dark');
 
-        /* --- Navegación Robusta --- */
+        /* --- Navegación Robusta (MEMORIA VISUAL AÑADIDA) --- */
         var views = ['escaner', 'manual', 'registro', 'reportes', 'ajustes'];
         var isAuthenticated = false;
+        
+        var isTareoLoaded = false;
+        var isReporteLoaded = false;
+        var isConfigLoaded = false;
 
         function switchTab(viewId) {
             views.forEach(function(v) {
@@ -632,9 +636,10 @@
             if (viewId === 'escaner') iniciarScanner();
             else detenerScanner();
 
-            if (viewId === 'manual') cargarTareoHoy();
-            if (viewId === 'reportes') cargarReporteMensual();
-            if (viewId === 'ajustes') cargarConfiguracion();
+            // Usar variables para NO RECARGAR si ya se cargó una vez
+            if (viewId === 'manual' && !isTareoLoaded) cargarTareoHoy();
+            if (viewId === 'reportes' && !isReporteLoaded) cargarReporteMensual();
+            if (viewId === 'ajustes' && !isConfigLoaded) cargarConfiguracion();
         }
 
         /* --- UI Helpers --- */
@@ -928,6 +933,7 @@
             
             google.script.run
                 .withSuccessHandler(function(empleados) {
+                    isTareoLoaded = true; // SE ACTIVA LA MEMORIA PARA NO RECARGAR OTRA VEZ
                     tbody.innerHTML = '';
                     
                     if(!empleados || empleados.length === 0) {
@@ -1024,13 +1030,12 @@
         }
 
         function cargarReporteMensual() {
-            isReporteLoaded = false; // Reinicia la memoria si forzamos sincronización
             var tbody = document.getElementById('reporte-tbody');
             tbody.innerHTML = '<tr><td colspan="5" class="py-16 text-center"><svg viewBox="0 0 280 150" class="h-10 w-auto mx-auto mb-4 animate-pulse grayscale" xmlns="http://www.w3.org/2000/svg"><g stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 32 110 L 32 65 A 34 34 0 0 1 100 65 L 100 110" stroke="#2563EB" stroke-width="32" /><path d="M 100 110 L 100 65 A 34 34 0 0 1 168 65 L 168 110" stroke="#8B5CF6" stroke-width="32" /><path d="M 229 13.2 L 229 53.2 M 209 33.2 L 249 33.2" stroke="#F97316" stroke-width="24" /></g></svg></td></tr>';
             
             google.script.run
                 .withSuccessHandler(function(rep) {
-                    isReporteLoaded = true; // Confirmamos que ya cargó en memoria
+                    isReporteLoaded = true; // SE ACTIVA LA MEMORIA PARA NO RECARGAR OTRA VEZ
                     tbody.innerHTML = '';
                     
                     if(!rep || rep.length === 0) {
@@ -1127,6 +1132,7 @@
         function cargarConfiguracion() {
             google.script.run
                 .withSuccessHandler(function(data) {
+                    isConfigLoaded = true; // SE ACTIVA LA MEMORIA PARA NO RECARGAR OTRA VEZ
                     var horaStr = data.horaIngreso;
                     if (horaStr && horaStr instanceof Date) {
                         var hh = String(horaStr.getHours()).padStart(2, '0');
