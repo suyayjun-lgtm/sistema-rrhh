@@ -3,70 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAS Digital | Sistema Corporativo</title>
+    <title>Panel Admin | MAS Digital</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-
-    <!-- Leaflet Map CSS/JS para Geolocalización UI -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- ========================================================================= -->
-    <!--  INYECCIÓN DEL CEREBRO PARA GITHUB PAGES (CONVERSIÓN API AUTOMÁTICA)      -->
-    <!-- ========================================================================= -->
     <script>
-        // 🛑🛑 ¡ATENCIÓN! PEGA AQUÍ TU URL DE IMPLEMENTACIÓN DE GOOGLE APPS SCRIPT 🛑🛑
-        var URL_BACKEND_GOOGLE = "https://script.google.com/macros/s/AKfycbxGOgcu_Xf5s043N4GxKSwoMctIpauv5e2ozVx1KPk7f6vUg-eqfRI17HkILmG8icfMUA/exec";
+        // 🛑🛑 ¡ATENCIÓN! PEGA AQUÍ TU NUEVA URL DE GOOGLE APPS SCRIPT 🛑🛑
+        var URL_BACKEND_GOOGLE = "https://script.google.com/macros/s/AKfycbyFmmZIP6v4_ZLtEIvCKw7rivmQVNrEMFeJwb6rOiByxHyj9Gfsi1lj86WZB9EsuvRcpw/exec";
 
         window.google = {
             script: {
-                run: {
-                    withSuccessHandler: function(cb) { this._success = cb; return this; },
-                    withFailureHandler: function(cb) { this._failure = cb; return this; },
-                    _callApi: function(accion, payload) {
-                        var self = this;
-                        if (!payload) payload = {};
-                        var form = new URLSearchParams();
-                        form.append('accion', accion);
-                        form.append('payload', JSON.stringify(payload));
-                        
-                        fetch(URL_BACKEND_GOOGLE, { method: 'POST', body: JSON.stringify({accion: accion, payload: payload}), headers: {"Content-Type": "text/plain;charset=utf-8"} })
-                        .then(function(r) { return r.json(); })
-                        .then(function(data) { if (self._success) self._success(data); })
-                        .catch(function(err) { if (self._failure) self._failure(err); });
-                    },
-                    getConfig: function() { this._callApi('getConfig'); },
-                    registrarAsistenciaQR: function(qr) { this._callApi('registrarAsistenciaQR', { qr: qr }); },
-                    obtenerTareoHoy: function() { this._callApi('obtenerTareoHoy'); },
-                    obtenerMiTareoMensual: function(dni, offset) { this._callApi('obtenerMiTareoMensual', { dni: dni, offset: offset }); },
-                    registrarEmpleado: function(data) { this._callApi('registrarEmpleado', { data: data }); },
-                    actualizarEstadoManual: function(dni, estado) { this._callApi('actualizarEstadoManual', { dni: dni, estado: estado }); },
-                    obtenerReporteMensual: function() { this._callApi('obtenerReporteMensual'); },
-                    verificarPassword: function(pass) { this._callApi('verificarPassword', { pass: pass }); },
-                    saveConfig: function(oldPass, data) { this._callApi('saveConfig', { oldPass: oldPass, data: data }); },
-                    verificarLicencia: function() { this._callApi('verificarLicencia'); }
+                get run() {
+                    return {
+                        withSuccessHandler: function(cb) { this._success = cb; return this; },
+                        withFailureHandler: function(cb) { this._failure = cb; return this; },
+                        _callApi: function(accion, payload) {
+                            var self = this;
+                            if (!payload) payload = {};
+                            var form = new URLSearchParams();
+                            form.append('accion', accion);
+                            form.append('payload', JSON.stringify(payload));
+                            
+                            fetch(URL_BACKEND_GOOGLE, { method: 'POST', body: JSON.stringify({accion: accion, payload: payload}), headers: {"Content-Type": "text/plain;charset=utf-8"} })
+                            .then(function(r) { return r.json(); })
+                            .then(function(data) { if (self._success) self._success(data); })
+                            .catch(function(err) { if (self._failure) self._failure(err); });
+                        },
+                        getConfig: function() { this._callApi('getConfig'); },
+                        registrarAsistenciaQR: function(qr) { this._callApi('registrarAsistenciaQR', { qr: qr }); },
+                        obtenerTareoHoy: function() { this._callApi('obtenerTareoHoy'); },
+                        registrarEmpleado: function(data) { this._callApi('registrarEmpleado', { data: data }); },
+                        actualizarEstadoManual: function(dni, estado) { this._callApi('actualizarEstadoManual', { dni: dni, estado: estado }); },
+                        obtenerReporteMensual: function() { this._callApi('obtenerReporteMensual'); },
+                        verificarPassword: function(pass) { this._callApi('verificarPassword', { pass: pass }); },
+                        saveConfig: function(oldPass, data) { this._callApi('saveConfig', { oldPass: oldPass, data: data }); },
+                        verificarLicencia: function() { this._callApi('verificarLicencia'); },
+                        obtenerEmpleados: function() { this._callApi('obtenerEmpleados'); }
+                    };
                 }
             }
         };
 
-        // Lógica de Bloqueo desde GitHub con CACHÉ OPTIMIZADO (Súper Rápido)
         function verificarAcceso(callback) {
-            var cacheKey = 'licencia_masdigital_estado';
-            var cacheTimeKey = 'licencia_masdigital_time';
+            var cacheKey = 'licencia_masdigital_estado_admin';
+            var cacheTimeKey = 'licencia_masdigital_time_admin';
             var now = new Date().getTime();
-            var tiempoExpiracion = 10 * 60 * 1000; // 10 minutos de caché
             
             var cached = localStorage.getItem(cacheKey);
             var cachedTime = localStorage.getItem(cacheTimeKey);
 
-            // Si hay caché válido, cargar al instante sin bloquear la pantalla
-            if (cached && cachedTime && (now - cachedTime < tiempoExpiracion)) {
-                var licenciaCacheada = JSON.parse(cached);
-                ejecutarAccionLicencia(licenciaCacheada);
+            if (cached && cachedTime && (now - cachedTime < 600000)) { 
+                ejecutarAccionLicencia(JSON.parse(cached));
                 if(callback) callback();
                 return;
             }
@@ -79,20 +72,14 @@
                 .withSuccessHandler(function(licencia) {
                     document.getElementById('loader-overlay').classList.add('hidden');
                     document.getElementById('loader-overlay').classList.remove('flex');
-                    
-                    // Guardar en Caché para la próxima vez
-                    if (licencia) {
-                        localStorage.setItem(cacheKey, JSON.stringify(licencia));
-                        localStorage.setItem(cacheTimeKey, now.toString());
-                    }
-                    
+                    if (licencia) { localStorage.setItem(cacheKey, JSON.stringify(licencia)); localStorage.setItem(cacheTimeKey, now.toString()); }
                     ejecutarAccionLicencia(licencia);
                     if(callback) callback();
                 })
                 .withFailureHandler(function() {
                     document.getElementById('loader-overlay').classList.add('hidden');
                     document.getElementById('loader-overlay').classList.remove('flex');
-                    if(callback) callback(); // Permitir pasar si hay falla de internet leve
+                    if(callback) callback(); 
                 })
                 .verificarLicencia();
         }
@@ -103,84 +90,50 @@
                 return;
             }
             if (licencia && licencia.estado === 'AVISO' && licencia.mensaje) {
-                var existingBanner = document.getElementById('licencia-banner');
+                var existingBanner = document.getElementById('licencia-banner-admin');
                 if(!existingBanner) {
                     var banner = document.createElement('div');
-                    banner.id = 'licencia-banner';
-                    banner.innerHTML = "⚠️ <b>Aviso MAS Digital:</b> " + licencia.mensaje;
+                    banner.id = 'licencia-banner-admin';
+                    banner.innerHTML = "⚠️ <b>Aviso:</b> " + licencia.mensaje;
                     banner.style.cssText = "background-color:#f59e0b; color:#000; text-align:center; padding:12px 20px; font-size:14px; position:sticky; top:0; z-index:999999; width:100%; font-family:sans-serif;";
                     document.body.prepend(banner);
                 }
             }
         }
     </script>
-    <!-- ========================================================================= -->
-
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Montserrat', 'sans-serif'] },
-                    colors: {
-                        brand: { blue: '#2563EB', purple: '#8B5CF6', orange: '#F97316', pink: '#EC4899' },
-                        slate: { 850: '#151e2e', 900: '#0f172a' } 
-                    }
-                }
-            }
-        }
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Montserrat', 'sans-serif'] }, colors: { brand: { blue: '#2563EB', purple: '#8B5CF6', orange: '#F97316', pink: '#EC4899' }, slate: { 850: '#151e2e', 900: '#0f172a' } } } } }
     </script>
     <style>
         body { background-color: #f8fafc; color: #0f172a; transition: background-color 0.3s ease, color 0.3s ease; }
         .dark body { background-color: #0f172a; color: #f8fafc; } 
-
-        .input-modern {
-            width: 100%; padding: 0.75rem 1rem; font-size: 0.875rem; border-radius: 0.5rem;
-            border: 1px solid #cbd5e1; background-color: #f8fafc; color: #0f172a;
-            transition: all 0.2s ease-in-out; outline: none;
-        }
+        .input-modern { width: 100%; padding: 0.75rem 1rem; font-size: 0.875rem; border-radius: 0.5rem; border: 1px solid #cbd5e1; background-color: #f8fafc; color: #0f172a; transition: all 0.2s ease-in-out; outline: none; }
         .input-modern:focus { border-color: #2563EB; background-color: #ffffff; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
         .dark .input-modern { border-color: #334155; background-color: #1e293b; color: #f1f5f9; }
         .dark .input-modern:focus { border-color: #3b82f6; background-color: #0f172a; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
-
         .label-modern { display: block; font-size: 0.75rem; font-weight: 600; color: #475569; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
         .dark .label-modern { color: #94a3b8; }
-
-        .section-card {
-            background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            transition: all 0.3s ease;
-        }
+        .section-card { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: all 0.3s ease; }
         .dark .section-card { background-color: #1e293b; border-color: #334155; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
-
         .nav-pill { padding: 0.625rem 1.25rem; font-size: 0.875rem; font-weight: 600; border-radius: 0.5rem; color: #64748b; transition: all 0.2s; }
         .nav-pill:hover { color: #0f172a; background-color: #e2e8f0; }
         .nav-pill.active { background-color: #2563EB; color: #ffffff; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3); }
-        
         .dark .nav-pill { color: #94a3b8; }
         .dark .nav-pill:hover { color: #f8fafc; background-color: #334155; }
-        .dark .nav-pill.active { background-color: #3b82f6; color: #ffffff; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4); }
-
-        /* Estilos del escáner */
+        .dark .nav-pill.active { background-color: #3b82f6; color: #ffffff; }
         #reader { border: none !important; border-radius: 1.5rem; overflow: hidden; background: transparent; }
         #reader video { border-radius: 1.5rem; object-fit: cover; width: 100%; height: 100%; }
-        #reader__dashboard_section_csr button { display: none !important; }
-        #reader__header_message { display: none !important; }
-
-        .scanner-laser {
-            position: absolute; left: 0; top: 0; width: 100%; height: 2px;
-            background: #2563EB; box-shadow: 0 0 10px 2px rgba(37, 99, 235, 0.5);
-            animation: scan 2.5s infinite linear; z-index: 20; opacity: 0;
-        }
+        #reader__dashboard_section_csr button, #reader__header_message { display: none !important; }
+        .scanner-laser { position: absolute; left: 0; top: 0; width: 100%; height: 2px; background: #2563EB; box-shadow: 0 0 10px 2px rgba(37, 99, 235, 0.5); animation: scan 2s infinite linear; z-index: 20; opacity: 0; }
         .dark .scanner-laser { background: #3b82f6; box-shadow: 0 0 10px 2px rgba(59, 130, 246, 0.6); }
         @keyframes scan { 0% { top: 5%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 95%; opacity: 0; } }
-
-        select option { background-color: #ffffff; color: #0f172a; font-weight: 500; }
-        .dark select option { background-color: #1e293b; color: #f8fafc; }
-        
-        /* Contenedor del mapa */
         #map-container { height: 350px; width: 100%; border-radius: 0.75rem; z-index: 10; border: 1px solid #e2e8f0; }
         .dark #map-container { border-color: #334155; }
+        
+        /* Animaciones para el Wizard */
+        .wizard-step { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .wizard-step.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col relative">
@@ -194,37 +147,35 @@
 
     <div id="custom-modal" class="fixed inset-0 z-50 hidden grid place-items-center bg-slate-900/50 dark:bg-black/60 backdrop-blur-sm transition-opacity duration-200 opacity-0">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl max-w-sm w-[90%] shadow-2xl transform scale-95 transition-transform duration-200 border border-gray-100 dark:border-slate-700" id="modal-content">
-            <div class="flex flex-col items-center text-center gap-3 mb-6" id="modal-header">
-                <div class="w-16 h-16 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center mb-2" id="modal-icon-container">
+            <div class="flex flex-col items-center text-center gap-3 mb-6">
+                <div class="w-16 h-16 rounded-full flex items-center justify-center mb-2" id="modal-icon-container">
                     <span class="text-3xl" id="modal-icon">✅</span>
                 </div>
                 <h3 id="modal-title" class="text-xl font-bold text-slate-900 dark:text-white">Aviso</h3>
             </div>
             <p id="modal-msg" class="text-slate-600 dark:text-slate-300 text-sm mb-8 leading-relaxed text-center"></p>
-            <button onclick="closeModal()" class="w-full bg-brand-blue hover:bg-blue-600 text-white py-3 rounded-xl font-semibold text-sm transition shadow-lg shadow-blue-500/30">Aceptar y Continuar</button>
+            <button onclick="closeModal()" class="w-full bg-brand-blue hover:bg-blue-600 text-white py-3 rounded-xl font-semibold text-sm transition">Aceptar</button>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-6 right-6 z-[120] transform translate-y-12 opacity-0 transition-all duration-300 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 font-semibold text-sm border border-slate-800 dark:border-gray-200">
-        <span id="toast-icon">✅</span>
-        <span id="toast-msg">Acción completada</span>
+    <div id="toast" class="fixed bottom-6 right-6 z-[120] transform translate-y-12 opacity-0 transition-all duration-300 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 font-semibold text-sm">
+        <span id="toast-icon">✅</span><span id="toast-msg">Acción completada</span>
     </div>
 
     <div id="auth-modal" class="fixed inset-0 z-[60] hidden grid place-items-center bg-slate-900/50 dark:bg-black/60 backdrop-blur-sm transition-opacity duration-200 opacity-0">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl max-w-sm w-[90%] shadow-2xl border border-gray-100 dark:border-slate-700 transform scale-95 transition-transform duration-200" id="auth-content">
             <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 text-center">Acceso Restringido</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 text-center mb-6">Ingrese la contraseña de administrador para configurar horarios.</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400 text-center mb-6">Ingrese contraseña de administrador.</p>
             <input type="password" id="auth-pass" class="input-modern mb-4 text-center tracking-widest text-lg" placeholder="••••••••">
             <div class="flex gap-3">
-                <button onclick="closeAuthModal()" class="w-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-white py-3 rounded-xl font-semibold text-sm transition">Cancelar</button>
-                <button onclick="submitAuth()" class="w-full bg-brand-blue hover:bg-blue-600 text-white py-3 rounded-xl font-semibold text-sm transition shadow-lg shadow-blue-500/30">Ingresar</button>
+                <button onclick="closeAuthModal()" class="w-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white py-3 rounded-xl font-semibold text-sm transition">Cancelar</button>
+                <button onclick="submitAuth()" class="w-full bg-brand-blue text-white py-3 rounded-xl font-semibold text-sm transition">Ingresar</button>
             </div>
         </div>
     </div>
 
     <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 md:px-8 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
-            
             <div class="flex items-center gap-3 select-none">
                 <svg viewBox="0 0 280 150" class="h-10 w-auto" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -240,40 +191,24 @@
                 </svg>
                 <div class="flex flex-col mt-1">
                     <div class="flex items-baseline leading-none">
-                        <span class="font-display font-[900] text-3xl text-slate-900 dark:text-white tracking-tighter">MAS</span>
-                        <span class="font-display font-[700] text-3xl text-slate-900 dark:text-white tracking-tighter ml-1">Digital</span>
-                        <span class="w-3 h-3 bg-brand-orange rounded-full ml-1.5 relative top-[-1px]"></span>
+                        <span class="font-display font-[900] text-2xl text-slate-900 dark:text-white tracking-tighter">MAS</span>
+                        <span class="font-display font-[700] text-2xl text-slate-900 dark:text-white tracking-tighter ml-1">Digital</span>
+                        <span class="w-2 h-2 bg-brand-orange rounded-full ml-1 relative top-[-1px]"></span>
                     </div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">Portal Admin</span>
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 block">Portal Admin</span>
                 </div>
             </div>
 
             <div class="flex items-center gap-3 w-full md:w-auto overflow-x-auto hide-scrollbar pb-2 md:pb-0">
                 <nav class="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <button onclick="switchTab('escaner')" id="tab-escaner" class="nav-pill active flex items-center gap-2 whitespace-nowrap">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-                        Escáner
-                    </button>
-                    <button onclick="switchTab('registro')" id="tab-registro" class="nav-pill flex items-center gap-2 whitespace-nowrap">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                        Nuevo Ingreso
-                    </button>
-                    <button onclick="switchTab('manual')" id="tab-manual" class="nav-pill flex items-center gap-2 whitespace-nowrap">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        Tareo HR
-                    </button>
-                    <button onclick="switchTab('reportes')" id="tab-reportes" class="nav-pill flex items-center gap-2 whitespace-nowrap">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                        Mes
-                    </button>
-                    <button onclick="requireAuth()" id="tab-ajustes" class="nav-pill flex items-center gap-2 whitespace-nowrap">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        Ajustes
-                    </button>
+                    <button onclick="switchTab('escaner')" id="tab-escaner" class="nav-pill active flex items-center gap-2 whitespace-nowrap"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Escáner</button>
+                    <button onclick="switchTab('manual')" id="tab-manual" class="nav-pill flex items-center gap-2 whitespace-nowrap"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Tareo HR</button>
+                    <button onclick="switchTab('reportes')" id="tab-reportes" class="nav-pill flex items-center gap-2 whitespace-nowrap"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg> Mes</button>
+                    <button onclick="switchTab('directorio')" id="tab-directorio" class="nav-pill flex items-center gap-2 whitespace-nowrap"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg> Directorio</button>
+                    <button onclick="switchTab('registro')" id="tab-registro" class="nav-pill flex items-center gap-2 whitespace-nowrap"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg> Nuevo Ingreso</button>
+                    <button onclick="requireAuth()" id="tab-ajustes" class="nav-pill flex items-center gap-2 whitespace-nowrap"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Ajustes</button>
                 </nav>
-                
                 <div class="h-8 w-px bg-slate-300 dark:bg-slate-700 hidden md:block mx-2"></div>
-                
                 <button onclick="toggleTheme()" class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-slate-500 dark:text-slate-400 shadow-sm" title="Cambiar Tema">
                     <svg id="theme-icon-moon" class="w-5 h-5 hidden dark:block" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
                     <svg id="theme-icon-sun" class="w-5 h-5 block dark:hidden" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path></svg>
@@ -284,40 +219,30 @@
 
     <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full transition-all">
 
-        <!-- ==========================================
-             NUEVO DISEÑO DE ESCÁNER (Basado en imagen)
-             ========================================== -->
         <section id="view-escaner" class="flex flex-col items-center justify-center min-h-[65vh] bg-slate-50/50 dark:bg-slate-900/30 rounded-3xl p-4">
-            
             <div id="scanner-wrapper" class="relative p-8 bg-white dark:bg-slate-800 rounded-[2rem] w-full max-w-[400px] mx-auto flex flex-col items-center border border-slate-100 dark:border-slate-700 shadow-sm">
-                <!-- Esquinas decorativas sutiles -->
                 <div class="absolute top-6 left-6 w-8 h-8 border-t-2 border-l-2 border-slate-200 dark:border-slate-600 rounded-tl-xl pointer-events-none"></div>
                 <div class="absolute top-6 right-6 w-8 h-8 border-t-2 border-r-2 border-slate-200 dark:border-slate-600 rounded-tr-xl pointer-events-none"></div>
                 <div class="absolute bottom-6 left-6 w-8 h-8 border-b-2 border-l-2 border-slate-200 dark:border-slate-600 rounded-bl-xl pointer-events-none"></div>
                 <div class="absolute bottom-6 right-6 w-8 h-8 border-b-2 border-r-2 border-slate-200 dark:border-slate-600 rounded-br-xl pointer-events-none"></div>
 
-                <!-- Contenedor Animado -->
                 <div class="relative w-full aspect-square rounded-[1.5rem] overflow-hidden bg-white dark:bg-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-none border border-slate-50 dark:border-slate-700 flex items-center justify-center group z-10">
                     <div id="reader" class="w-full h-full absolute inset-0 z-0 bg-black hidden"></div>
-
                     <div id="scanner-ui" class="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-white dark:bg-slate-800 transition-all">
                         <div class="w-16 h-16 bg-[#f0f4ff] dark:bg-blue-900/30 text-brand-blue rounded-full flex items-center justify-center mb-5">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         </div>
                         <h3 class="text-[20px] font-bold text-slate-800 dark:text-white mb-2 tracking-tight">Activar Cámara</h3>
-                        <p class="text-[13px] text-slate-500 dark:text-slate-400 text-center mb-8 px-4 leading-relaxed">Permitir acceso para leer el código en vivo.</p>
-
-                        <button onclick="activarCamaraReal()" class="w-full max-w-[240px] bg-brand-blue hover:bg-blue-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-500/20 text-sm">
-                            Iniciar Escáner
-                        </button>
+                        <p class="text-[13px] text-slate-500 dark:text-slate-400 text-center mb-8 px-4 leading-relaxed">Permitir acceso para leer códigos en vivo.</p>
+                        <button onclick="activarCamaraReal()" class="w-full max-w-[240px] bg-brand-blue hover:bg-blue-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-500/20 text-sm">Iniciar Escáner</button>
                     </div>
                     <div id="scanner-laser" class="scanner-laser hidden"></div>
                 </div>
             </div>
 
-            <!-- Botón Subir Foto -->
-            <div class="mt-8 relative w-full max-w-[320px] mx-auto">
-                <input type="file" id="qr-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="handleImageUpload(event)">
+            <!-- Botón Subir Foto Admin -->
+            <div class="mt-6 relative w-full max-w-[320px] mx-auto">
+                <input type="file" id="qr-upload-admin" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="handleImageUpload(event)">
                 <div class="w-full bg-[#f8fafc] dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-3 rounded-[14px] flex items-center justify-center gap-2 font-semibold text-sm border border-slate-200 dark:border-slate-700 transition-colors pointer-events-none hover:bg-slate-100 dark:hover:bg-slate-700">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                     Subir Foto QR Manualmente
@@ -325,160 +250,155 @@
             </div>
         </section>
 
-        <!-- ==========================================
-             VISTAS DE REGISTRO, TAREO, REPORTES Y AJUSTES
-             ========================================== -->
+        <section id="view-directorio" class="hidden h-full flex-col pb-12">
+            <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-3xl font-black mb-2 text-slate-900 dark:text-white tracking-tight">Directorio del Personal</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">Visualiza y gestiona las fichas de todos los trabajadores registrados.</p>
+                </div>
+                <div class="w-full md:w-auto relative">
+                    <input type="text" id="search-directorio" onkeyup="filtrarDirectorio()" class="input-modern pl-10 w-full md:w-72" placeholder="Buscar por nombre o DNI...">
+                    <svg class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </div>
+            <div id="grid-directorio" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Data inyectada -->
+            </div>
+        </section>
+
         <section id="view-registro" class="hidden pb-12">
             <div class="mb-8 border-b border-slate-200 dark:border-slate-800 pb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
-                    <h2 class="text-3xl font-black mb-2 text-slate-900 dark:text-white tracking-tight">Ficha Corporativa de Ingreso</h2>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm">Alta de nuevo personal en la base de datos central. El código QR único se generará y enviará al correo proporcionado.</p>
+                    <h2 class="text-3xl font-black mb-2 text-slate-900 dark:text-white tracking-tight">Registro de Empleado</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">Alta de personal paso a paso. El código QR único se enviará a su correo.</p>
                 </div>
             </div>
 
-            <form id="form-registro" class="space-y-8" onsubmit="handleRegistration(event)">
-                <!-- Sección 1 -->
-                <div class="section-card p-6 md:p-8">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-brand-blue"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></div>
-                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">1. Datos Personales</h3>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div><label class="label-modern">Nombres *</label><input type="text" id="reg-nombres" required class="input-modern" placeholder="Ej. Juan Carlos"></div>
-                        <div><label class="label-modern">Apellidos *</label><input type="text" id="reg-apellidos" required class="input-modern" placeholder="Ej. Pérez Gómez"></div>
-                        <div><label class="label-modern">N° Identidad (DNI) *</label><input type="number" id="reg-dni" required class="input-modern" placeholder="Ej. 76543210"></div>
-                        <div><label class="label-modern">Fecha Nacimiento *</label><input type="date" id="reg-nacimiento" required class="input-modern"></div>
-                        <div><label class="label-modern">Género</label>
-                            <select id="reg-genero" class="input-modern bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-position: right 0.75rem center; background-size: 1rem; appearance: none;">
-                                <option value="">Seleccionar...</option><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option><option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <div><label class="label-modern">Estado Civil</label>
-                            <select id="reg-civil" class="input-modern bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-position: right 0.75rem center; background-size: 1rem; appearance: none;">
-                                <option value="">Seleccionar...</option><option value="Soltero(a)">Soltero(a)</option><option value="Casado(a)">Casado(a)</option><option value="Divorciado(a)">Divorciado(a)</option>
-                            </select>
-                        </div>
-                    </div>
+            <!-- Progreso del Wizard -->
+            <div class="mb-8 max-w-4xl mx-auto">
+                <div class="flex justify-between text-xs font-bold text-slate-400 mb-2 px-2 uppercase tracking-widest">
+                    <span id="step-txt-1" class="text-brand-blue">1. Personal</span>
+                    <span id="step-txt-2">2. Contacto</span>
+                    <span id="step-txt-3">3. Salud</span>
+                    <span id="step-txt-4">4. Profesional</span>
                 </div>
+                <div class="h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden shadow-inner">
+                    <div id="wizard-progress" class="h-full bg-brand-blue rounded-full w-1/4 transition-all duration-500 ease-out"></div>
+                </div>
+            </div>
 
-                <!-- Sección 2 -->
-                <div class="section-card p-6 md:p-8">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-brand-purple"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
-                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">2. Información de Contacto</h3>
+            <form id="form-registro" class="max-w-4xl mx-auto relative min-h-[400px]">
+                <div id="step-1" class="wizard-step active section-card p-6 md:p-10">
+                    <div class="flex items-center gap-3 mb-8">
+                        <!-- Icono de usuario reparado -->
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-brand-blue">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Datos Personales</h3>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div><label class="label-modern">Correo Electrónico (Envío QR) *</label><input type="email" id="reg-email" required class="input-modern" placeholder="correo@ejemplo.com"></div>
-                        <div><label class="label-modern">Celular Personal *</label><input type="tel" id="reg-celular" required class="input-modern" placeholder="Ej. 987654321"></div>
-                        <div class="md:col-span-2"><label class="label-modern">Dirección de Domicilio *</label><input type="text" id="reg-direccion" required class="input-modern" placeholder="Av. / Calle, Nro, Dpto, Ref"></div>
-                        <div class="md:col-span-2"><label class="label-modern">Distrito / Ciudad *</label><input type="text" id="reg-distrito" required class="input-modern" placeholder="Ej. Miraflores, Lima"></div>
+                        <div><label class="label-modern">Nombres <span class="text-red-500">*</span></label><input type="text" id="reg-nombres" class="input-modern uppercase" placeholder="Ej. JUAN CARLOS"></div>
+                        <div><label class="label-modern">Apellidos Completos (Mín. 2) <span class="text-red-500">*</span></label><input type="text" id="reg-apellidos" class="input-modern uppercase" placeholder="Ej. PÉREZ GÓMEZ"></div>
+                        <div><label class="label-modern">DNI (Exacto 8 dígitos) <span class="text-red-500">*</span></label><input type="tel" maxlength="8" id="reg-dni" class="input-modern font-mono text-lg tracking-widest" placeholder="12345678" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
+                        <div><label class="label-modern">Fecha Nacimiento <span class="text-red-500">*</span></label><input type="date" id="reg-nacimiento" class="input-modern"></div>
+                        <div><label class="label-modern">Género</label><select id="reg-genero" class="input-modern"><option value="">Seleccionar...</option><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option><option value="Otro">Otro</option></select></div>
+                        <div><label class="label-modern">Estado Civil</label><select id="reg-civil" class="input-modern"><option value="">Seleccionar...</option><option value="Soltero(a)">Soltero(a)</option><option value="Casado(a)">Casado(a)</option><option value="Divorciado(a)">Divorciado(a)</option></select></div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Sección 3 -->
-                    <div class="section-card p-6 md:p-8">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg></div>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">3. Salud & Emergencias</h3>
+                <div id="step-2" class="wizard-step section-card p-6 md:p-10">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-brand-purple">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                         </div>
-                        <div class="space-y-5">
-                            <div class="grid grid-cols-2 gap-5">
-                                <div><label class="label-modern">Tipo de Sangre</label><input type="text" id="reg-sangre" class="input-modern" placeholder="Ej. O+"></div>
-                                <div><label class="label-modern">Alergias</label><input type="text" id="reg-alergias" class="input-modern" value="Ninguna"></div>
-                            </div>
-                            <div><label class="label-modern">Condiciones Médicas</label><input type="text" id="reg-medica" class="input-modern" value="Ninguna"></div>
-                            <div class="pt-3 pb-2"><div class="h-px w-full bg-slate-200 dark:bg-slate-700"></div></div>
-                            <div><label class="label-modern">Contacto de Emergencia *</label><input type="text" id="reg-familiar" required class="input-modern" placeholder="Nombre completo del familiar"></div>
-                            <div class="grid grid-cols-2 gap-5">
-                                <div><label class="label-modern">Parentesco *</label><input type="text" id="reg-parentesco" required class="input-modern" placeholder="Madre, Padre, etc."></div>
-                                <div><label class="label-modern">Celular Emergencia *</label><input type="tel" id="reg-emergencia" required class="input-modern" placeholder="Número móvil"></div>
-                            </div>
-                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Información de Contacto</h3>
                     </div>
-                    <!-- Sección 4 -->
-                    <div class="section-card p-6 md:p-8">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-brand-orange"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">4. Perfil Profesional</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div><label class="label-modern">Correo (Para envío de QR) <span class="text-red-500">*</span></label><input type="email" id="reg-email" class="input-modern" placeholder="correo@ejemplo.com"></div>
+                        <div><label class="label-modern">Celular (Exacto 9 dígitos) <span class="text-red-500">*</span></label><input type="tel" maxlength="9" id="reg-celular" class="input-modern font-mono text-lg tracking-widest" placeholder="987654321" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
+                        <div class="md:col-span-2"><label class="label-modern">Dirección de Domicilio <span class="text-red-500">*</span></label><input type="text" id="reg-direccion" class="input-modern uppercase" placeholder="Av. / Calle, Nro, Dpto, Ref"></div>
+                        <div class="md:col-span-2"><label class="label-modern">Distrito / Ciudad <span class="text-red-500">*</span></label><input type="text" id="reg-distrito" class="input-modern uppercase" placeholder="Ej. Miraflores, Lima"></div>
+                    </div>
+                </div>
+
+                <div id="step-3" class="wizard-step section-card p-6 md:p-10">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                         </div>
-                        <div class="grid grid-cols-1 gap-6">
-                            <div><label class="label-modern">Cargo / Puesto Asignado *</label><input type="text" id="reg-cargo" required class="input-modern" placeholder="Ej. Desarrollador Senior"></div>
-                            <div><label class="label-modern">Profesión / Especialidad</label><input type="text" id="reg-profesion" class="input-modern" placeholder="Cargo o título"></div>
-                            <div><label class="label-modern">Centro de Estudios</label><input type="text" id="reg-estudios" class="input-modern" placeholder="Universidad / Instituto"></div>
-                            <div><label class="label-modern">Licencia de Conducir</label><input type="text" id="reg-licencia" class="input-modern" placeholder="Categoría (Opcional)"></div>
-                            <div><label class="label-modern">Cuenta Sueldo (Banco y N°)</label><input type="text" id="reg-banco" class="input-modern" placeholder="Ej. BCP 193-12345678-0-12"></div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Salud y Emergencias</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div><label class="label-modern">Tipo de Sangre</label><input type="text" id="reg-sangre" class="input-modern uppercase" placeholder="Ej. O+"></div>
+                        <div><label class="label-modern">Alergias</label><input type="text" id="reg-alergias" class="input-modern uppercase" value="NINGUNA"></div>
+                        <div class="md:col-span-2"><label class="label-modern">Condiciones Médicas</label><input type="text" id="reg-medica" class="input-modern uppercase" value="NINGUNA"></div>
+                    </div>
+                    <div class="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <h4 class="font-bold text-sm text-slate-700 dark:text-slate-300 mb-4 uppercase tracking-wider">Contacto de Emergencia</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2"><label class="label-modern">Nombre y Apellido Familiar <span class="text-red-500">*</span></label><input type="text" id="reg-familiar" class="input-modern uppercase" placeholder="Mín. 2 palabras obligatorias"></div>
+                            <div><label class="label-modern">Parentesco <span class="text-red-500">*</span></label><input type="text" id="reg-parentesco" class="input-modern uppercase" placeholder="Ej. MADRE, ESPOSO"></div>
+                            <div><label class="label-modern">Celular (Exacto 9 dígitos) <span class="text-red-500">*</span></label><input type="tel" maxlength="9" id="reg-emergencia" class="input-modern font-mono tracking-widest" placeholder="987654321" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex justify-end pt-6 border-t border-slate-200 dark:border-slate-800">
-                    <button type="submit" class="bg-brand-blue hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-xl shadow-xl shadow-blue-500/20 transition-all flex items-center gap-3 w-full md:w-auto justify-center text-lg">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                        Guardar Ficha y Generar QR
+                <div id="step-4" class="wizard-step section-card p-6 md:p-10">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-brand-orange">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Perfil Profesional</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div><label class="label-modern">Cargo / Puesto <span class="text-red-500">*</span></label><input type="text" id="reg-cargo" class="input-modern uppercase" placeholder="Ej. DESARROLLADOR"></div>
+                        <div><label class="label-modern">Profesión / Especialidad</label><input type="text" id="reg-profesion" class="input-modern uppercase" placeholder="Título"></div>
+                        <div><label class="label-modern">Centro de Estudios</label><input type="text" id="reg-estudios" class="input-modern uppercase" placeholder="Instituto/Universidad"></div>
+                        <div><label class="label-modern">Licencia de Conducir</label><input type="text" id="reg-licencia" class="input-modern uppercase" placeholder="Opcional"></div>
+                        <div class="md:col-span-2"><label class="label-modern">Cuenta Sueldo (Banco y N°)</label><input type="text" id="reg-banco" class="input-modern uppercase" placeholder="Ej. BCP 193-12345678"></div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" id="btn-prev" onclick="cambiarPaso(-1)" class="hidden bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-4 px-8 rounded-2xl transition">Atrás</button>
+                    <button type="button" id="btn-next" onclick="cambiarPaso(1)" class="ml-auto bg-brand-blue hover:bg-blue-600 text-white font-bold py-4 px-10 rounded-2xl transition shadow-lg shadow-blue-500/30">Siguiente Paso</button>
+                    <button type="button" id="btn-submit" onclick="enviarRegistro()" class="hidden ml-auto bg-brand-orange hover:bg-orange-600 text-white font-bold py-4 px-10 rounded-2xl transition shadow-lg shadow-orange-500/30 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg> Finalizar Ficha
                     </button>
                 </div>
             </form>
         </section>
 
-        <!-- ==========================================
-             NUEVO TAREO HR (Diseño Imagen 2)
-             ========================================== -->
         <section id="view-manual" class="hidden h-full flex-col">
             <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 class="text-3xl font-black mb-2 text-slate-900 dark:text-white tracking-tight">Panel de Asistencia HR</h2>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm">Gestione las asistencias, justificaciones y permisos del mes en curso.</p>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">Visualización de asistencia diaria y minutos de tardanza.</p>
                 </div>
-                <button onclick="cargarTareoHoy()" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold py-2.5 px-5 rounded-lg shadow-sm flex items-center gap-2 transition-all">
-                    <svg class="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    Sincronizar Datos
+                <button onclick="cargarTareoHoy(true)" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 text-slate-700 dark:text-slate-200 text-sm font-bold py-3 px-6 rounded-2xl shadow-sm flex items-center gap-2 transition-all">
+                    <svg class="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Sincronizar Datos
                 </button>
             </div>
 
-            <!-- Dashboard Stats -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
-                <div class="section-card p-5 flex items-center gap-4 border-l-4 border-l-slate-400 dark:bg-slate-800/80">
-                    <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-900/50 flex items-center justify-center text-slate-600 dark:text-slate-300 text-xl">👥</div>
-                    <div><p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-0.5">Planilla</p><p class="text-2xl font-black text-slate-900 dark:text-white leading-none" id="stat-total">-</p></div>
-                </div>
-                <div class="section-card p-5 flex items-center gap-4 border-l-4 border-l-green-500 dark:bg-slate-800/80">
-                    <div class="w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400 text-xl">✅</div>
-                    <div><p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-0.5">Asistencias</p><p class="text-2xl font-black text-green-600 dark:text-green-400 leading-none" id="stat-asis">-</p></div>
-                </div>
-                <div class="section-card p-5 flex items-center gap-4 border-l-4 border-l-red-500 dark:bg-slate-800/80">
-                    <div class="w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600 dark:text-red-400 text-xl">❌</div>
-                    <div><p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-0.5">Faltas</p><p class="text-2xl font-black text-red-600 dark:text-red-400 leading-none" id="stat-faltas">-</p></div>
-                </div>
-                <div class="section-card p-5 flex items-center gap-4 border-l-4 border-l-yellow-500 dark:bg-slate-800/80">
-                    <div class="w-12 h-12 rounded-full bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center text-yellow-600 dark:text-yellow-400 text-xl">⚠️</div>
-                    <div><p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-0.5">Excepciones</p><p class="text-2xl font-black text-yellow-600 dark:text-yellow-400 leading-none" id="stat-exc">-</p></div>
-                </div>
+                <div class="section-card p-5 flex items-center gap-4 border-l-4 border-l-slate-400"><div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-xl">👥</div><div><p class="text-[10px] font-bold text-slate-500 uppercase">Planilla</p><p class="text-2xl font-black text-slate-900 dark:text-white" id="stat-total">-</p></div></div>
+                <div class="section-card p-5 flex items-center gap-4 border-l-4 border-l-green-500"><div class="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center text-xl">✅</div><div><p class="text-[10px] font-bold text-slate-500 uppercase">Asistió / Tarde</p><p class="text-2xl font-black text-green-600" id="stat-asis">-</p></div></div>
+                <div class="section-card p-5 flex items-center gap-4 border-l-4 border-l-red-500"><div class="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center text-xl">❌</div><div><p class="text-[10px] font-bold text-slate-500 uppercase">Faltas</p><p class="text-2xl font-black text-red-600" id="stat-faltas">-</p></div></div>
+                <div class="section-card p-5 flex items-center gap-4 border-l-4 border-l-yellow-500"><div class="w-12 h-12 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center text-xl">⚠️</div><div><p class="text-[10px] font-bold text-slate-500 uppercase">Excepciones</p><p class="text-2xl font-black text-yellow-600" id="stat-exc">-</p></div></div>
             </div>
 
-            <!-- Tabla de Asistencia Exacta a la Foto -->
-            <div class="bg-white dark:bg-slate-900 rounded-[1rem] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.03)] dark:shadow-none border border-slate-200 dark:border-slate-800 border-t-4 border-t-brand-blue">
+            <div class="bg-white dark:bg-slate-900 rounded-[1.5rem] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 border-t-4 border-t-brand-blue">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm whitespace-nowrap">
-                        <thead class="bg-white dark:bg-slate-900 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200 dark:border-slate-800">
+                        <thead class="bg-slate-50 dark:bg-slate-900/50 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200 dark:border-slate-800">
                             <tr>
                                 <th class="py-5 px-6 w-40">Identificación</th>
                                 <th class="py-5 px-6">Empleado Registrado</th>
-                                <th class="py-5 px-6 w-56 text-right">Estado Operativo (Hoy)</th>
+                                <th class="py-5 px-6 w-64 text-right">Estado Operativo (Hoy)</th>
                             </tr>
                         </thead>
                         <tbody id="tareo-tbody" class="divide-y divide-slate-100 dark:divide-slate-800">
-                            <tr>
-                                <td colspan="3" class="py-16 text-center">
-                                    <svg viewBox="0 0 280 150" class="h-10 w-auto mx-auto mb-4 animate-pulse grayscale" xmlns="http://www.w3.org/2000/svg">
-                                        <g stroke-linecap="round" stroke-linejoin="round" fill="none">
-                                            <path d="M 32 110 L 32 65 A 34 34 0 0 1 100 65 L 100 110" stroke="#2563EB" stroke-width="32" />
-                                            <path d="M 100 110 L 100 65 A 34 34 0 0 1 168 65 L 168 110" stroke="#8B5CF6" stroke-width="32" />
-                                            <path d="M 229 13.2 L 229 53.2 M 209 33.2 L 249 33.2" stroke="#F97316" stroke-width="24" />
-                                        </g>
-                                    </svg>
-                                </td>
-                            </tr>
+                            <tr><td colspan="3" class="py-16 text-center text-slate-500">Pulse "Sincronizar Datos" para cargar.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -489,111 +409,76 @@
             <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 class="text-3xl font-black mb-2 text-slate-900 dark:text-white tracking-tight">Reporte Mensual</h2>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm">Resumen consolidado de asistencias, tardanzas (minutos) y faltas.</p>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">Resumen consolidado. Muestra días de tardanza y la suma total de minutos.</p>
                 </div>
-                <button onclick="cargarReporteMensual()" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold py-2.5 px-5 rounded-lg shadow-sm flex items-center gap-2 transition-all">
-                    <svg class="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    Actualizar Reporte
+                <button onclick="cargarReporteMensual(true)" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 text-slate-700 dark:text-slate-200 text-sm font-bold py-3 px-6 rounded-2xl shadow-sm flex items-center gap-2 transition-all">
+                    <svg class="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Actualizar Reporte
                 </button>
             </div>
             
-            <div class="section-card overflow-hidden flex-grow flex flex-col shadow-sm border-t-4 border-t-brand-purple">
+            <div class="section-card overflow-hidden flex-grow flex flex-col border-t-4 border-t-brand-purple">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm whitespace-nowrap">
-                        <thead class="bg-slate-50 dark:bg-slate-900/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest border-b border-slate-200 dark:border-slate-700">
+                        <thead class="bg-slate-50 dark:bg-slate-900/50 text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-slate-700">
                             <tr>
                                 <th class="py-4 px-6">Empleado Registrado</th>
-                                <th class="py-4 px-6 text-center text-green-600 dark:text-green-400">Días Asistió</th>
-                                <th class="py-4 px-6 text-center text-red-600 dark:text-red-400">Faltas</th>
+                                <th class="py-4 px-6 text-center text-green-600">Días Asistió</th>
+                                <th class="py-4 px-6 text-center text-red-600">Faltas</th>
                                 <th class="py-4 px-6 text-center text-brand-purple">Descansos</th>
-                                <th class="py-4 px-6 text-center text-yellow-600 dark:text-yellow-400">Minutos Tarde</th>
+                                <th class="py-4 px-6 text-center text-yellow-600">Días Tarde</th>
+                                <th class="py-4 px-6 text-center text-orange-600">Mins. Tarde (Suma)</th>
                             </tr>
                         </thead>
                         <tbody id="reporte-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/80">
-                            <tr>
-                                <td colspan="5" class="p-16 text-center">
-                                    <svg viewBox="0 0 280 150" class="h-10 w-auto mx-auto mb-4 animate-pulse grayscale" xmlns="http://www.w3.org/2000/svg">
-                                        <g stroke-linecap="round" stroke-linejoin="round" fill="none">
-                                            <path d="M 32 110 L 32 65 A 34 34 0 0 1 100 65 L 100 110" stroke="#2563EB" stroke-width="32" />
-                                            <path d="M 100 110 L 100 65 A 34 34 0 0 1 168 65 L 168 110" stroke="#8B5CF6" stroke-width="32" />
-                                            <path d="M 229 13.2 L 229 53.2 M 209 33.2 L 249 33.2" stroke="#F97316" stroke-width="24" />
-                                        </g>
-                                    </svg>
-                                </td>
-                            </tr>
+                            <tr><td colspan="6" class="p-16 text-center text-slate-500">Pulse "Actualizar Reporte" para cargar.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- ==========================================
-             CONFIGURACIÓN DE HORARIOS Y MAPAS
-             ========================================== -->
         <section id="view-ajustes" class="hidden pb-12">
             <div class="mb-8 border-b border-slate-200 dark:border-slate-800 pb-6">
                 <h2 class="text-3xl font-black mb-2 text-slate-900 dark:text-white tracking-tight">Configuración del Sistema</h2>
-                <p class="text-slate-500 dark:text-slate-400 text-sm">Define horarios y la ubicación geográfica de la oficina central.</p>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Define horarios, GPS y el nombre de la empresa para los correos.</p>
             </div>
 
-            <div class="section-card p-6 md:p-8 max-w-4xl mx-auto border-t-4 border-t-slate-800 dark:border-t-slate-400">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    
-                    <!-- Formulario de Configuración -->
+            <div class="section-card p-6 md:p-10 max-w-4xl mx-auto border-t-4 border-t-slate-800 dark:border-t-slate-400">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     <div class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="label-modern">Hora de Ingreso Oficial</label>
-                                <input type="time" id="conf-hora" class="input-modern text-lg font-mono">
-                                <p class="text-xs text-slate-500 mt-2">Formato 24 horas.</p>
-                            </div>
-                            <div>
-                                <label class="label-modern">Tolerancia (Minutos)</label>
-                                <input type="number" id="conf-tolerancia" class="input-modern text-lg font-mono" min="0" placeholder="Ej. 10">
-                                <p class="text-xs text-slate-500 mt-2">Gracia antes de marcar tardanza.</p>
-                            </div>
+                            <div><label class="label-modern">Hora de Ingreso</label><input type="time" id="conf-hora" class="input-modern text-lg font-mono text-center"></div>
+                            <div><label class="label-modern">Tolerancia (Min)</label><input type="number" id="conf-tolerancia" class="input-modern text-lg font-mono text-center" min="0"></div>
                         </div>
-                        
                         <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
-                            <label class="label-modern">Cambiar Contraseña de Admin</label>
-                            <input type="text" id="conf-pass" class="input-modern" placeholder="Nueva contraseña o mantener actual...">
+                            <label class="label-modern text-brand-blue">Nombre de la Empresa (Para Correos)</label>
+                            <input type="text" id="conf-empresa" class="input-modern font-bold text-brand-blue" placeholder="Ej. MAS Digital">
                         </div>
-
+                        <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <label class="label-modern">Cambiar Clave de Admin</label>
+                            <input type="text" id="conf-pass" class="input-modern" placeholder="Nueva contraseña o dejar vacío...">
+                        </div>
                         <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
                             <label class="label-modern">Radio Seguridad GPS (Metros)</label>
-                            <input type="number" id="conf-radio" class="input-modern font-mono text-brand-blue" placeholder="Ej. 10">
-                            <p class="text-xs text-slate-500 mt-2">Margen de distancia permitida para los empleados.</p>
+                            <input type="number" id="conf-radio" class="input-modern font-mono text-brand-blue font-bold text-center">
                         </div>
-                        
-                        <!-- Campos Ocultos de Coordenadas, solo lectura -->
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="label-modern text-[10px]">Latitud (Automático)</label><input type="text" id="conf-lat" class="input-modern bg-slate-100 text-xs text-slate-500" readonly></div>
-                            <div><label class="label-modern text-[10px]">Longitud (Automático)</label><input type="text" id="conf-lng" class="input-modern bg-slate-100 text-xs text-slate-500" readonly></div>
+                            <div><label class="label-modern text-[10px]">Latitud</label><input type="text" id="conf-lat" class="input-modern bg-slate-50 text-xs" readonly></div>
+                            <div><label class="label-modern text-[10px]">Longitud</label><input type="text" id="conf-lng" class="input-modern bg-slate-50 text-xs" readonly></div>
                         </div>
                     </div>
 
-                    <!-- MAPA PARA FIJAR UBICACIÓN -->
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-end mb-2">
-                            <div>
-                                <label class="label-modern !mb-1">Fijar Ubicación de la Empresa</label>
-                                <p class="text-xs text-slate-500">Mueve el pin a la puerta de ingreso.</p>
-                            </div>
-                            <!-- Botón Mágico: Mi Ubicación -->
-                            <button type="button" onclick="centrarEnMiUbicacion()" class="bg-blue-50 hover:bg-blue-100 text-brand-blue text-xs font-bold py-2 px-3 rounded-lg border border-blue-200 transition-colors flex items-center gap-1.5 shadow-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                Mi Ubicación Actual
-                            </button>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-end">
+                            <label class="label-modern !mb-0">Ubicación de la Empresa</label>
+                            <button type="button" onclick="centrarEnMiUbicacion()" class="bg-blue-50 text-brand-blue text-xs font-bold py-2 px-3 rounded-lg flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg> Mi Ubicación</button>
                         </div>
                         <div id="map-container" class="shadow-inner"></div>
                     </div>
-
                 </div>
-                
-                <div class="pt-6 mt-6 border-t border-slate-100 dark:border-slate-800 flex justify-end">
-                    <button onclick="guardarConfiguracion()" class="bg-slate-900 dark:bg-brand-blue hover:bg-slate-800 dark:hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-slate-900/20 dark:shadow-blue-500/30 transition-all flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        Guardar Cambios
+                <div class="pt-8 mt-8 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                    <button onclick="guardarConfiguracion()" class="bg-slate-900 dark:bg-brand-blue text-white font-bold py-4 px-10 rounded-2xl shadow-lg transition-all flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> Guardar Cambios
                     </button>
                 </div>
             </div>
@@ -601,686 +486,238 @@
 
     </main>
 
-    <!-- INICIO DE JAVASCRIPT ES5 CLÁSICO -->
     <script>
-        /* --- Theme Toggle --- */
-        function toggleTheme() {
-            var html = document.documentElement;
-            html.classList.toggle('dark');
-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-        }
+        function toggleTheme() { var html = document.documentElement; html.classList.toggle('dark'); localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light'); }
         if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
-        else document.documentElement.classList.remove('dark');
 
-        /* --- Navegación Robusta (MEMORIA VISUAL AÑADIDA) --- */
-        var views = ['escaner', 'manual', 'registro', 'reportes', 'ajustes'];
+        var views = ['escaner', 'manual', 'registro', 'reportes', 'ajustes', 'directorio'];
         var isAuthenticated = false;
         
         var isTareoLoaded = false;
         var isReporteLoaded = false;
-        var isConfigLoaded = false;
+        var isDirectorioLoaded = false;
 
         function switchTab(viewId) {
             views.forEach(function(v) {
-                var el = document.getElementById('view-' + v);
-                if (el) el.classList.add('hidden');
-                var tabEl = document.getElementById('tab-' + v);
-                if (tabEl) tabEl.classList.remove('active');
+                var el = document.getElementById('view-' + v); if (el) el.classList.add('hidden');
+                var tabEl = document.getElementById('tab-' + v); if (tabEl) tabEl.classList.remove('active');
             });
-            
-            var targetView = document.getElementById('view-' + viewId);
-            if (targetView) targetView.classList.remove('hidden');
-            var targetTab = document.getElementById('tab-' + viewId);
-            if (targetTab) targetTab.classList.add('active');
+            var targetView = document.getElementById('view-' + viewId); if (targetView) targetView.classList.remove('hidden');
+            var targetTab = document.getElementById('tab-' + viewId); if (targetTab) targetTab.classList.add('active');
 
-            if (viewId === 'escaner') iniciarScanner();
-            else detenerScanner();
-
-            // Usar variables para NO RECARGAR si ya se cargó una vez
-            if (viewId === 'manual' && !isTareoLoaded) cargarTareoHoy();
-            if (viewId === 'reportes' && !isReporteLoaded) cargarReporteMensual();
-            if (viewId === 'ajustes' && !isConfigLoaded) cargarConfiguracion();
+            if (viewId === 'escaner') iniciarScanner(); else detenerScanner();
+            if (viewId === 'manual' && !isTareoLoaded) cargarTareoHoy(false);
+            if (viewId === 'reportes' && !isReporteLoaded) cargarReporteMensual(false);
+            if (viewId === 'directorio' && !isDirectorioLoaded) cargarDirectorio(false);
+            if (viewId === 'ajustes') cargarConfiguracion();
         }
 
-        /* --- UI Helpers --- */
         function showToast(msg, isError) {
-            if(isError === undefined) isError = false;
-            var toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            document.getElementById('toast-icon').innerText = isError ? "❌" : "✅";
-            toast.classList.remove('translate-y-12', 'opacity-0');
-            setTimeout(function() { toast.classList.add('translate-y-12', 'opacity-0'); }, 3000);
+            if(isError === undefined) isError = false; var toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg; document.getElementById('toast-icon').innerText = isError ? "❌" : "✅";
+            toast.classList.remove('translate-y-12', 'opacity-0'); setTimeout(function() { toast.classList.add('translate-y-12', 'opacity-0'); }, 3000);
         }
 
         function showModal(title, message, isSuccess) {
             if(isSuccess === undefined) isSuccess = true;
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-msg').innerText = message;
-            var iconContainer = document.getElementById('modal-icon-container');
-            iconContainer.className = isSuccess 
-                ? "w-16 h-16 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center mb-2 text-green-500" 
-                : "w-16 h-16 rounded-full bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center mb-2 text-yellow-500";
+            document.getElementById('modal-title').innerText = title; document.getElementById('modal-msg').innerText = message;
+            document.getElementById('modal-icon-container').className = isSuccess ? "w-16 h-16 rounded-full bg-green-50 text-green-500 flex items-center justify-center mb-2" : "w-16 h-16 rounded-full bg-yellow-50 text-yellow-500 flex items-center justify-center mb-2";
             document.getElementById('modal-icon').innerText = isSuccess ? "✅" : "⚠️";
-            
-            var modal = document.getElementById('custom-modal');
-            var content = document.getElementById('modal-content');
-            modal.classList.remove('hidden');
-            setTimeout(function() { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+            var modal = document.getElementById('custom-modal'); var content = document.getElementById('modal-content');
+            modal.classList.remove('hidden'); setTimeout(function() { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
         }
+        function closeModal() { var modal = document.getElementById('custom-modal'); var content = document.getElementById('modal-content'); modal.classList.add('opacity-0'); content.classList.add('scale-95'); setTimeout(function() { modal.classList.add('hidden'); }, 200); }
 
-        function closeModal() {
-            var modal = document.getElementById('custom-modal');
-            var content = document.getElementById('modal-content');
-            modal.classList.add('opacity-0');
-            content.classList.add('scale-95');
-            setTimeout(function() { modal.classList.add('hidden'); }, 200);
-        }
-
-        /* =========================================================================
-           LÓGICA DEL ESCÁNER (Cámara Nativa y Subida Foto)
-           ========================================================================= */
-        var html5QrCode = null;
-        var isProcessingScan = false;
-        var myAudioContext = null;
-
-        function emitirSonidoBeep() {
-            try {
-                if (!myAudioContext) {
-                    myAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (myAudioContext.state === 'suspended') {
-                    myAudioContext.resume();
-                }
-                
-                var oscillator = myAudioContext.createOscillator();
-                var gainNode = myAudioContext.createGain();
-                
-                oscillator.type = 'square'; // Tipo de onda más intensa y ruidosa
-                oscillator.frequency.value = 900; // Frecuencia más alta
-                
-                gainNode.gain.setValueAtTime(1.0, myAudioContext.currentTime); // Volumen máximo 100%
-                gainNode.gain.exponentialRampToValueAtTime(0.01, myAudioContext.currentTime + 0.15); // Un pitido más larguito
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(myAudioContext.destination);
-                
-                oscillator.start(myAudioContext.currentTime);
-                oscillator.stop(myAudioContext.currentTime + 0.15);
-            } catch(e) {
-                console.log("No se pudo reproducir el sonido: ", e);
+        /* --- WIZARD LOGIC Y VALIDACIONES ESTRICTAS --- */
+        var currentStep = 1;
+        function updateWizardUI() {
+            for(var i=1; i<=4; i++) {
+                document.getElementById('step-'+i).classList.remove('active');
+                document.getElementById('step-txt-'+i).classList.remove('text-brand-blue');
+                document.getElementById('step-txt-'+i).classList.add('text-slate-400');
             }
+            document.getElementById('step-'+currentStep).classList.add('active');
+            for(var j=1; j<=currentStep; j++) { document.getElementById('step-txt-'+j).classList.remove('text-slate-400'); document.getElementById('step-txt-'+j).classList.add('text-brand-blue'); }
+            document.getElementById('wizard-progress').style.width = (currentStep * 25) + '%';
+            document.getElementById('btn-prev').classList.toggle('hidden', currentStep === 1);
+            if(currentStep === 4) { document.getElementById('btn-next').classList.add('hidden'); document.getElementById('btn-submit').classList.remove('hidden'); } 
+            else { document.getElementById('btn-next').classList.remove('hidden'); document.getElementById('btn-submit').classList.add('hidden'); }
         }
 
-        function iniciarScanner() {
-            var uiContainer = document.getElementById('scanner-ui');
-            if (uiContainer) uiContainer.classList.remove('hidden');
-            var laser = document.getElementById('scanner-laser');
-            if (laser) laser.classList.add('hidden');
-            
-            if (uiContainer && (!html5QrCode || (html5QrCode && !html5QrCode.isScanning))) {
-                uiContainer.innerHTML = '<div class="w-16 h-16 bg-[#f0f4ff] dark:bg-blue-900/30 text-brand-blue rounded-full flex items-center justify-center mb-5">' +
-                                        '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>' +
-                                        '</div>' +
-                                        '<h3 class="text-[20px] font-bold text-slate-800 dark:text-white mb-2 tracking-tight">Activar Cámara</h3>' +
-                                        '<p class="text-[13px] text-slate-500 dark:text-slate-400 text-center mb-8 px-4 leading-relaxed">Permitir acceso para leer el código en vivo.</p>' +
-                                        '<button onclick="activarCamaraReal()" class="w-full max-w-[240px] bg-brand-blue hover:bg-blue-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-500/20 text-sm">' +
-                                        'Iniciar Escáner' +
-                                        '</button>';
+        function validarPaso(paso) {
+            if(paso === 1) {
+                var nom = document.getElementById('reg-nombres').value.trim(); var ape = document.getElementById('reg-apellidos').value.trim();
+                var dni = document.getElementById('reg-dni').value.trim(); var nac = document.getElementById('reg-nacimiento').value;
+                if(!nom || !ape || !dni || !nac) { showToast("Complete todos los campos (*)", true); return false; }
+                if(ape.split(/\s+/).length < 2) { showToast("Ingrese al menos dos apellidos", true); return false; }
+                if(!/^\d{8}$/.test(dni)) { showToast("El DNI debe tener 8 números exactos", true); return false; }
             }
+            else if(paso === 2) {
+                var email = document.getElementById('reg-email').value.trim(); var cel = document.getElementById('reg-celular').value.trim();
+                var dir = document.getElementById('reg-direccion').value.trim(); var dis = document.getElementById('reg-distrito').value.trim();
+                if(!email || !cel || !dir || !dis) { showToast("Complete todos los campos (*)", true); return false; }
+                if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast("Correo inválido", true); return false; }
+                if(!/^\d{9}$/.test(cel)) { showToast("El celular debe tener 9 números exactos", true); return false; }
+            }
+            else if(paso === 3) {
+                var fam = document.getElementById('reg-familiar').value.trim(); var par = document.getElementById('reg-parentesco').value.trim();
+                var emCel = document.getElementById('reg-emergencia').value.trim();
+                if(!fam || !par || !emCel) { showToast("Complete emergencia (*)", true); return false; }
+                if(fam.split(/\s+/).length < 2) { showToast("Contacto requiere Nombre y Apellido", true); return false; }
+                if(!/^\d{9}$/.test(emCel)) { showToast("Celular de emergencia: 9 números exactos", true); return false; }
+            }
+            else if(paso === 4) {
+                var cargo = document.getElementById('reg-cargo').value.trim();
+                if(!cargo) { showToast("El cargo es obligatorio", true); return false; }
+            }
+            return true;
         }
 
+        function cambiarPaso(dir) { if (dir === 1 && !validarPaso(currentStep)) return; currentStep += dir; if(currentStep < 1) currentStep = 1; if(currentStep > 4) currentStep = 4; updateWizardUI(); }
+
+        function enviarRegistro() {
+            if(!validarPaso(4)) return;
+            var data = {
+                nombres: document.getElementById('reg-nombres').value.trim(), apellidos: document.getElementById('reg-apellidos').value.trim(),
+                dni: document.getElementById('reg-dni').value.trim(), fechaNacimiento: document.getElementById('reg-nacimiento').value,
+                genero: document.getElementById('reg-genero').value, estadoCivil: document.getElementById('reg-civil').value,
+                email: document.getElementById('reg-email').value.trim(), celular: document.getElementById('reg-celular').value.trim(),
+                direccion: document.getElementById('reg-direccion').value.trim(), distrito: document.getElementById('reg-distrito').value.trim(),
+                alergias: document.getElementById('reg-alergias').value.trim(), tipoSangre: document.getElementById('reg-sangre').value.trim(),
+                condicionMedica: document.getElementById('reg-medica').value.trim(), familiar: document.getElementById('reg-familiar').value.trim(),
+                parentesco: document.getElementById('reg-parentesco').value.trim(), emergencia: document.getElementById('reg-emergencia').value.trim(),
+                cargo: document.getElementById('reg-cargo').value.trim(), profesion: document.getElementById('reg-profesion').value.trim(),
+                estudios: document.getElementById('reg-estudios').value.trim(), licencia: document.getElementById('reg-licencia').value.trim(), cuentaBancaria: document.getElementById('reg-banco').value.trim()
+            };
+            showModal("Guardando", "Registrando ficha en base de datos...", true); document.getElementById('modal-icon').innerText = "⏳";
+            google.script.run.withSuccessHandler(function(res) {
+                if(res.success) { showModal("Registrado", res.message, true); document.getElementById('form-registro').reset(); currentStep=1; updateWizardUI(); isDirectorioLoaded=false; }
+                else showModal("Error", res.message, false);
+            }).withFailureHandler(function() { showModal("Error", "Fallo al comunicar con BD.", false); }).registrarEmpleado(data);
+        }
+
+        /* --- ESCÁNER CON SUBIDA DE FOTO --- */
+        var html5QrCode = null; var isProcessingScan = false; var myAudioContext = null;
+        function emitirSonidoBeep() { try { if(!myAudioContext) myAudioContext = new (window.AudioContext||window.webkitAudioContext)(); if(myAudioContext.state==='suspended') myAudioContext.resume(); var osc=myAudioContext.createOscillator(); var gain=myAudioContext.createGain(); osc.type='square'; osc.frequency.value=900; gain.gain.setValueAtTime(1.0, myAudioContext.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, myAudioContext.currentTime+0.15); osc.connect(gain); gain.connect(myAudioContext.destination); osc.start(myAudioContext.currentTime); osc.stop(myAudioContext.currentTime+0.15); } catch(e){} }
+        
+        function iniciarScanner() { var ui = document.getElementById('scanner-ui'); if(ui) ui.classList.remove('hidden'); var laser = document.getElementById('scanner-laser'); if(laser) laser.classList.add('hidden'); }
         function activarCamaraReal() {
-            // Inicializar AudioContext con interacción de usuario para iOS
-            if (!myAudioContext) {
-                myAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (myAudioContext.state === 'suspended') {
-                myAudioContext.resume();
-            }
-
-            var uiContainer = document.getElementById('scanner-ui');
-            var readerContainer = document.getElementById('reader');
-
-            uiContainer.innerHTML = '<div class="flex flex-col items-center">' +
-                                    '<svg class="animate-spin h-10 w-10 text-brand-blue dark:text-white mb-4 drop-shadow-md" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>' +
-                                    '<span class="text-slate-900 dark:text-white font-bold text-sm tracking-widest uppercase drop-shadow-md text-center">Iniciando Cámara...<br/><span class="text-xs font-normal capitalize text-slate-500 dark:text-slate-300">Por favor, acepta los permisos.</span></span>' +
-                                    '</div>';
-            
-            readerContainer.classList.remove('hidden');
-
-            if (!html5QrCode) {
-                html5QrCode = new Html5Qrcode("reader");
-            }
-
-            // CONFIGURACIÓN ACELERADA DE CÁMARA (20 fps en lugar de 10)
-            var config = { fps: 20, qrbox: { width: 250, height: 250 } };
-            
-            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, undefined)
-                .then(function() {
-                    uiContainer.classList.add('hidden');
-                    document.getElementById('scanner-laser').classList.remove('hidden');
-                })
-                .catch(function(err) {
-                    console.log("Fallo cámara trasera, intentando método secundario...", err);
-                    Html5Qrcode.getCameras().then(function(devices) {
-                        if (devices && devices.length > 0) {
-                            return html5QrCode.start(devices[0].id, config, onScanSuccess, undefined);
-                        } else {
-                            throw new Error("No cámaras encontradas");
-                        }
-                    }).then(function() {
-                        uiContainer.classList.add('hidden');
-                        document.getElementById('scanner-laser').classList.remove('hidden');
-                    }).catch(function(finalErr) {
-                        console.error("Error total de cámara:", finalErr);
-                        readerContainer.classList.add('hidden'); 
-                        uiContainer.innerHTML = '<div class="text-center">' +
-                                                '<span class="text-5xl mb-4 block">🚫</span>' +
-                                                '<p class="text-slate-800 dark:text-slate-200 font-bold mb-2 text-lg">Cámara Bloqueada</p>' +
-                                                '<p class="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">Permiso denegado. Habilita el acceso en tu navegador y usa HTTPS.</p>' +
-                                                '<button onclick="iniciarScanner()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-xl transition-all">Reintentar</button>' +
-                                                '</div>';
-                    });
-                });
+            if(!myAudioContext) myAudioContext = new (window.AudioContext||window.webkitAudioContext)(); if(myAudioContext.state==='suspended') myAudioContext.resume();
+            var ui = document.getElementById('scanner-ui'); var reader = document.getElementById('reader');
+            ui.innerHTML = '<div class="flex flex-col items-center"><svg class="animate-spin h-10 w-10 text-brand-blue mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="font-bold text-sm">Iniciando...</span></div>';
+            reader.classList.remove('hidden');
+            if(!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: {width:250, height:250} }, function(text) {
+                if(isProcessingScan) return; isProcessingScan=true; emitirSonidoBeep(); detenerScanner();
+                showModal("Procesando", "Verificando credencial...", true); document.getElementById('modal-icon').innerText = "⏳";
+                google.script.run.withSuccessHandler(function(r){ showModal(r.success?"Registrado":"Aviso", r.message, r.success); setTimeout(function(){isProcessingScan=false; iniciarScanner();},3000); }).withFailureHandler(function(){ showModal("Error", "Problema de red.", false); setTimeout(function(){isProcessingScan=false; iniciarScanner();},3000); }).registrarAsistenciaQR(text.trim());
+            }, undefined).then(function(){ ui.classList.add('hidden'); document.getElementById('scanner-laser').classList.remove('hidden'); }).catch(function(err){ ui.innerHTML='<div class="text-center"><span class="text-3xl block mb-2">🚫</span><p class="font-bold text-sm">Cámara Bloqueada</p><button onclick="iniciarScanner()" class="mt-4 bg-slate-200 px-4 py-2 rounded-xl text-xs font-bold">Reintentar</button></div>'; });
         }
 
         function handleImageUpload(e) {
             if (!e.target.files || e.target.files.length === 0) return;
             var file = e.target.files[0];
             if(!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+            showModal("Procesando", "Analizando código en la foto...", true); document.getElementById('modal-icon').innerText = "⏳";
+            html5QrCode.scanFile(file, true).then(function(decodedText) {
+                closeModal(); emitirSonidoBeep(); isProcessingScan = true; document.getElementById('qr-upload-admin').value = '';
+                showModal("Procesando", "Enviando código al servidor...", true); document.getElementById('modal-icon').innerText = "⏳";
+                google.script.run.withSuccessHandler(function(r){ showModal(r.success?"Registrado":"Aviso", r.message, r.success); setTimeout(function(){isProcessingScan=false; iniciarScanner();},3000); }).withFailureHandler(function(){ showModal("Error", "Problema de red.", false); setTimeout(function(){isProcessingScan=false; iniciarScanner();},3000); }).registrarAsistenciaQR(decodedText.trim());
+            }).catch(function(err) { showModal("Foto inválida", "No se detectó un código QR. Intente de nuevo.", false); document.getElementById('qr-upload-admin').value = ''; });
+        }
 
-            var modal = document.getElementById('custom-modal');
-            showModal("Procesando", "Analizando código en la imagen...", true);
-            document.getElementById('modal-icon').innerText = "⏳";
-            
-            html5QrCode.scanFile(file, true)
-                .then(function(decodedText) {
-                    closeModal();
-                    onScanSuccess(decodedText);
-                    document.getElementById('qr-upload').value = ''; 
-                })
-                .catch(function(err) {
-                    showModal("Foto inválida", "No se detectó un código QR. Intente de nuevo.", false);
-                    document.getElementById('qr-upload').value = '';
+        function detenerScanner() { if(html5QrCode) { try{ var isScan = typeof html5QrCode.getState==='function' ? (html5QrCode.getState()===2) : html5QrCode.isScanning; if(isScan) { html5QrCode.stop().then(function(){html5QrCode.clear(); html5QrCode=null;}).catch(function(){html5QrCode.clear(); html5QrCode=null;}); } else { html5QrCode.clear(); html5QrCode=null; } } catch(e){ html5QrCode=null; } } var l=document.getElementById('scanner-laser'); if(l) l.classList.add('hidden'); var r=document.getElementById('reader'); if(r) r.classList.add('hidden'); }
+
+        /* --- DIRECTORIO --- */
+        var directoryData = [];
+        function cargarDirectorio(force) {
+            if(!force && isDirectorioLoaded) return;
+            var grid = document.getElementById('grid-directorio');
+            grid.innerHTML = '<div class="col-span-full py-16 text-center text-slate-500 font-medium"><svg class="animate-spin h-8 w-8 text-brand-blue mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Descargando directorio...</div>';
+            google.script.run.withSuccessHandler(function(emps) {
+                isDirectorioLoaded = true; directoryData = emps; renderizarDirectorio(emps);
+            }).withFailureHandler(function() { grid.innerHTML = '<div class="col-span-full py-12 text-center text-red-500">Error de red.</div>'; }).obtenerEmpleados();
+        }
+        function renderizarDirectorio(emps) {
+            var grid = document.getElementById('grid-directorio'); grid.innerHTML = '';
+            if(!emps || emps.length === 0) { grid.innerHTML = '<div class="col-span-full py-16 text-center bg-white rounded-2xl border border-slate-200 shadow-sm"><span class="text-4xl block mb-3">👥</span><h3 class="font-bold text-slate-800 text-lg">Directorio Vacío</h3><p class="text-sm text-slate-500 mt-2">Ve a la pestaña "Nuevo Ingreso" para registrar a tu primer empleado.</p></div>'; return; }
+            emps.forEach(function(emp) {
+                var ini = (emp.nombres.charAt(0) + emp.apellidos.charAt(0)).toUpperCase();
+                grid.innerHTML += '<div class="section-card p-5 flex flex-col gap-4 border-t-4 border-t-brand-blue">' +
+                    '<div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-brand-blue font-black text-lg">' + ini + '</div><div><h4 class="font-bold text-slate-900 leading-tight">' + emp.nombres + '<br>' + emp.apellidos + '</h4><p class="text-[11px] font-bold tracking-widest uppercase text-slate-500 mt-1">' + emp.cargo + '</p></div></div>' +
+                    '<div class="text-[13px] text-slate-600 space-y-1 mt-2 bg-slate-50 p-3 rounded-lg"><p><span class="font-bold">DNI:</span> ' + emp.dni + '</p><p><span class="font-bold">Celular:</span> ' + emp.celular + '</p></div>' +
+                    '<button onclick="alert(\'Funcionalidad de Edición en desarrollo.\')" class="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition">Ver Ficha Completa</button></div>';
+            });
+        }
+        function filtrarDirectorio() { var q = document.getElementById('search-directorio').value.toLowerCase(); var filtrados = directoryData.filter(function(e) { return (e.nombres+" "+e.apellidos).toLowerCase().includes(q) || e.dni.includes(q); }); renderizarDirectorio(filtrados); }
+
+        /* --- TAREO Y REPORTES --- */
+        var LEYENDA = [ { id: '-', label: 'Sin Marcar', c: 'bg-slate-100 text-slate-500' }, { id: 'A', label: 'Asistió', c: 'bg-green-100 text-green-700' }, { id: 'T', label: 'Tarde', c: 'bg-yellow-100 text-yellow-700' }, { id: 'F', label: 'Falta', c: 'bg-red-100 text-red-700' }, { id: 'DL', label: 'Día Libre', c: 'bg-blue-100 text-blue-700' }, { id: 'V', label: 'Vacaciones', c: 'bg-purple-100 text-purple-700' }, { id: 'DM', label: 'Desc. Médico', c: 'bg-teal-100 text-teal-700' }, { id: 'LF', label: 'Lic. Fallecim.', c: 'bg-gray-200 text-gray-700' }, { id: 'LP', label: 'Lic. Patern.', c: 'bg-indigo-100 text-indigo-700' }, { id: 'S', label: 'Suspensión', c: 'bg-orange-100 text-orange-700' }, { id: 'PS', label: 'Permiso S/G', c: 'bg-pink-100 text-pink-700' }, { id: 'PC', label: 'Permiso C/G', c: 'bg-emerald-100 text-emerald-700' }, { id: 'AB', label: 'Abandono', c: 'bg-slate-300 text-slate-800' }, { id: 'R', label: 'Retiro', c: 'bg-slate-800 text-white' } ];
+        function getCls(id) { for(var i=0;i<LEYENDA.length;i++) if(LEYENDA[i].id===id) return LEYENDA[i].c; return LEYENDA[0].c; }
+        
+        function cargarTareoHoy(force) {
+            if(!force && isTareoLoaded) return;
+            var tb = document.getElementById('tareo-tbody'); tb.innerHTML = '<tr><td colspan="3" class="py-16 text-center"><svg class="animate-spin h-8 w-8 text-brand-blue mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></td></tr>';
+            google.script.run.withSuccessHandler(function(emps) {
+                isTareoLoaded = true; tb.innerHTML = '';
+                if(!emps||emps.length===0) { tb.innerHTML = '<tr><td colspan="3" class="py-16 text-center text-slate-500 font-medium">No hay registros en la BD.</td></tr>'; return; }
+                var as=0, fa=0, ex=0;
+                emps.forEach(function(e) {
+                    if(e.estado==='A'||e.estado==='T') as++; else if(e.estado==='F'||e.estado==='-') fa++; else if(e.estado!=='R'&&e.estado!=='AB') ex++;
+                    var tr = document.createElement('tr'); tr.className = (e.estado==='R'||e.estado==='AB')?"bg-slate-50 opacity-60 grayscale":"hover:bg-slate-50 transition-colors";
+                    var sel = '<select onchange="cambiarEstado(\''+e.dni+'\', this)" class="w-full pl-4 pr-10 py-2.5 text-sm font-bold rounded-xl border outline-none cursor-pointer ' + getCls(e.estado) + '">';
+                    LEYENDA.forEach(function(l){ sel += '<option value="'+l.id+'" class="bg-white text-black" '+(e.estado===l.id?"selected":"")+'>'+l.id+' - '+l.label+'</option>'; }); sel+='</select>';
+                    
+                    var extratime = "";
+                    if(e.estado === 'T' && e.minutosTarde > 0) {
+                        extratime = '<div class="mt-1 text-[11px] text-slate-500 font-mono text-left pl-1">Hora: ' + e.horaExacta + ' <span class="bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold ml-1">+' + e.minutosTarde + ' min</span></div>';
+                    } else if(e.estado === 'A' && e.horaExacta) {
+                        extratime = '<div class="mt-1 text-[11px] text-slate-500 font-mono text-left pl-1">Hora: ' + e.horaExacta + '</div>';
+                    }
+                    
+                    tr.innerHTML = '<td class="py-4 px-6 border-b border-slate-100"><div class="text-[13px] text-slate-500">' + e.dni + '</div><div class="text-[11px] font-bold text-brand-blue tracking-widest">' + e.codigo + '</div></td><td class="py-4 px-6 border-b border-slate-100 font-bold">' + e.nombres + '</td><td class="py-4 px-6 border-b border-slate-100 text-right"><div class="w-56 inline-block">' + sel + extratime + '</div></td>';
+                    tb.appendChild(tr);
                 });
+                document.getElementById('stat-total').innerText = emps.length; document.getElementById('stat-asis').innerText = as; document.getElementById('stat-faltas').innerText = fa; document.getElementById('stat-exc').innerText = ex;
+            }).obtenerTareoHoy();
         }
-
-        function detenerScanner() {
-            if (html5QrCode) {
-                try {
-                    var isScanning = typeof html5QrCode.getState === 'function' ? (html5QrCode.getState() === 2) : html5QrCode.isScanning;
-                    if (isScanning) {
-                        html5QrCode.stop().then(function() {
-                            html5QrCode.clear();
-                            html5QrCode = null;
-                        }).catch(function(e) { html5QrCode.clear(); html5QrCode = null; });
-                    } else {
-                        html5QrCode.clear();
-                        html5QrCode = null;
-                    }
-                } catch(e) {
-                    html5QrCode = null;
-                }
-            }
-            var laser = document.getElementById('scanner-laser');
-            if (laser) laser.classList.add('hidden');
-
-            var readerContainer = document.getElementById('reader');
-            if (readerContainer) readerContainer.classList.add('hidden');
-        }
-
-        function onScanSuccess(decodedText) {
-            if (isProcessingScan) return;
-            isProcessingScan = true;
-            
-            // Emitir sonido fuerte al detectar
-            emitirSonidoBeep();
-
-            document.getElementById('loader-text').innerText = "Guardando en la nube...";
-            document.getElementById('loader-overlay').classList.remove('hidden');
-            document.getElementById('loader-overlay').classList.add('flex');
-            
-            google.script.run
-                .withSuccessHandler(function(res) {
-                    document.getElementById('loader-overlay').classList.add('hidden');
-                    document.getElementById('loader-overlay').classList.remove('flex');
-                    showModal(res.success ? "Ingreso Registrado" : "Atención", res.message, res.success);
-                    setTimeout(function() { isProcessingScan = false; }, 3000); 
-                })
-                .withFailureHandler(function() {
-                    document.getElementById('loader-overlay').classList.add('hidden');
-                    document.getElementById('loader-overlay').classList.remove('flex');
-                    showModal("Error", "Problema de red con el servidor central.", false);
-                    setTimeout(function() { isProcessingScan = false; }, 3000);
-                })
-                .registrarAsistenciaQR(decodedText.trim());
-        }
-
-        function handleRegistration(e) {
-            e.preventDefault();
-            var data = {
-                nombres: document.getElementById('reg-nombres').value.trim(),
-                apellidos: document.getElementById('reg-apellidos').value.trim(),
-                dni: document.getElementById('reg-dni').value.trim(),
-                fechaNacimiento: document.getElementById('reg-nacimiento').value,
-                genero: document.getElementById('reg-genero').value,
-                estadoCivil: document.getElementById('reg-civil').value,
-                email: document.getElementById('reg-email').value.trim(),
-                celular: document.getElementById('reg-celular').value.trim(),
-                direccion: document.getElementById('reg-direccion').value.trim(),
-                distrito: document.getElementById('reg-distrito').value.trim(),
-                alergias: document.getElementById('reg-alergias').value.trim(),
-                tipoSangre: document.getElementById('reg-sangre').value.trim(),
-                condicionMedica: document.getElementById('reg-medica').value.trim(),
-                familiar: document.getElementById('reg-familiar').value.trim(),
-                parentesco: document.getElementById('reg-parentesco').value.trim(),
-                emergencia: document.getElementById('reg-emergencia').value.trim(),
-                cargo: document.getElementById('reg-cargo').value.trim(),
-                profesion: document.getElementById('reg-profesion').value.trim(),
-                estudios: document.getElementById('reg-estudios').value.trim(),
-                licencia: document.getElementById('reg-licencia').value.trim(),
-                cuentaBancaria: document.getElementById('reg-banco').value.trim()
-            };
-
-            document.getElementById('loader-text').innerText = "Registrando empleado...";
-            document.getElementById('loader-overlay').classList.remove('hidden');
-            document.getElementById('loader-overlay').classList.add('flex');
-
-            google.script.run
-                .withSuccessHandler(function(res) {
-                    document.getElementById('loader-overlay').classList.add('hidden');
-                    document.getElementById('loader-overlay').classList.remove('flex');
-                    if(res.success) {
-                        showModal("Personal Registrado", res.message, true);
-                        document.getElementById('form-registro').reset();
-                    } else showModal("Error en Registro", res.message, false);
-                })
-                .withFailureHandler(function() {
-                    document.getElementById('loader-overlay').classList.add('hidden');
-                    document.getElementById('loader-overlay').classList.remove('flex');
-                    showModal("Error Crítico", "Fallo al comunicar con la base de datos.", false);
-                })
-                .registrarEmpleado(data);
-        }
-
-        var LEYENDA = [
-            { id: '-', label: 'Sin Marcar', color: 'bg-[#f8fafc] dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700' },
-            { id: 'A', label: 'Asistió', color: 'bg-[#f0fdf4] dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800' },
-            { id: 'T', label: 'Tarde', color: 'bg-[#fefce8] dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800' },
-            { id: 'F', label: 'Falta / Inasistencia', color: 'bg-[#fef2f2] dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800' },
-            { id: 'DL', label: 'Día Libre', color: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800' },
-            { id: 'V', label: 'Vacaciones', color: 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800' },
-            { id: 'DM', label: 'Descanso Médico', color: 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-800' },
-            { id: 'LF', label: 'Lic. Fallecimiento', color: 'bg-gray-100 dark:bg-gray-800/80 text-gray-700 dark:text-gray-400 border-gray-300 dark:border-gray-700' },
-            { id: 'LP', label: 'Lic. Paternidad', color: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800' },
-            { id: 'S', label: 'Suspensión', color: 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800' },
-            { id: 'PS', label: 'Permiso S/Goce', color: 'bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-800' },
-            { id: 'PC', label: 'Permiso C/Goce', color: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' },
-            { id: 'AB', label: 'Abandono', color: 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-300 border-slate-400 dark:border-slate-600' },
-            { id: 'R', label: 'Retiro', color: 'bg-slate-800 dark:bg-slate-900 text-white border-slate-900 dark:border-black' }
-        ];
-
-        function getStyleClassForId(id) {
-            for(var i=0; i<LEYENDA.length; i++) {
-                if(LEYENDA[i].id === id) return LEYENDA[i].color;
-            }
-            return LEYENDA[0].color;
-        }
-
-        function cargarTareoHoy() {
-            var tbody = document.getElementById('tareo-tbody');
-            tbody.innerHTML = '<tr><td colspan="3" class="py-16 px-6 text-center text-slate-500 font-medium"><svg class="animate-spin h-8 w-8 text-brand-blue mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Sincronizando datos con el servidor...</td></tr>';
-            
-            google.script.run
-                .withSuccessHandler(function(empleados) {
-                    isTareoLoaded = true; // SE ACTIVA LA MEMORIA PARA NO RECARGAR OTRA VEZ
-                    tbody.innerHTML = '';
-                    
-                    if(!empleados || empleados.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="3" class="py-16 px-6 text-center text-slate-500 font-medium">No hay empleados registrados en la BD.</td></tr>';
-                        return;
-                    }
-
-                    var asis=0, faltas=0, exc=0;
-
-                    for(var i=0; i<empleados.length; i++) {
-                        var emp = empleados[i];
-                        if(emp.estado === 'A' || emp.estado === 'T') asis++;
-                        else if(emp.estado === 'F' || emp.estado === '-') faltas++;
-                        else if (emp.estado !== 'R' && emp.estado !== 'AB') exc++; 
-
-                        var trClass = "hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors bg-white dark:bg-slate-900";
-                        if (emp.estado === 'R' || emp.estado === 'AB') {
-                            trClass = "bg-slate-50 dark:bg-slate-900/50 opacity-60 grayscale";
-                        }
-
-                        var tr = document.createElement('tr');
-                        tr.className = trClass;
-                        
-                        var selectHTML = '<div class="relative inline-block w-48 text-left">' +
-                            '<select onchange="cambiarEstado(\'' + emp.dni + '\', this)" class="w-full appearance-none outline-none pl-4 pr-10 py-2.5 text-sm font-bold rounded-xl border shadow-sm cursor-pointer transition-all ' + getStyleClassForId(emp.estado) + '">';
-                        
-                        for(var j=0; j<LEYENDA.length; j++) {
-                            var op = LEYENDA[j];
-                            var selected = (emp.estado === op.id) ? "selected" : "";
-                            selectHTML += '<option value="' + op.id + '" class="bg-white dark:bg-slate-800 text-slate-900 dark:text-white py-2" ' + selected + '>' + op.id + ' - ' + op.label + '</option>';
-                        }
-                        selectHTML += '</select>' +
-                            '<div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">' +
-                                '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>' +
-                            '</div>' +
-                        '</div>';
-
-                        var inicialesArr = emp.nombres.split(' ');
-                        var ini1 = inicialesArr.length > 0 ? inicialesArr[0].charAt(0) : "";
-                        var ini2 = inicialesArr.length > 1 ? inicialesArr[1].charAt(0) : "";
-                        var iniciales = (ini1 + ini2).toUpperCase();
-
-                        var extraHoraHtml = emp.estado === 'T' ? '<div class="mt-2 text-[10px] text-yellow-600 dark:text-yellow-400 font-mono tracking-tighter opacity-90 text-left w-48 inline-block"><span class="font-bold uppercase mr-1">Hora:</span> ' + emp.rawEstado + '</div>' : '';
-
-                        tr.innerHTML = 
-                            '<td class="py-4 px-6 border-b border-slate-100 dark:border-slate-800/80">' +
-                                '<div class="flex flex-col gap-1">' +
-                                    '<span class="font-medium text-[13px] text-slate-500 dark:text-slate-400">' + emp.dni + '</span>' +
-                                    '<span class="text-[11px] font-bold tracking-widest text-brand-blue">' + emp.codigo + '</span>' +
-                                '</div>' +
-                            '</td>' +
-                            '<td class="py-4 px-6 border-b border-slate-100 dark:border-slate-800/80">' +
-                                '<div class="flex items-center gap-4">' +
-                                    '<div class="w-10 h-10 rounded-2xl bg-[#f5f3ff] dark:bg-indigo-900/30 text-brand-purple flex items-center justify-center font-bold text-sm shrink-0">' + iniciales + '</div>' +
-                                    '<div class="flex flex-col">' +
-                                        '<span class="font-bold text-slate-800 dark:text-slate-100 text-[14px] uppercase">' + emp.nombres + '</span>' +
-                                    '</div>' +
-                                '</div>' +
-                            '</td>' +
-                            '<td class="py-4 px-6 border-b border-slate-100 dark:border-slate-800/80 text-right relative">' +
-                                selectHTML + extraHoraHtml +
-                            '</td>';
-                        tbody.appendChild(tr);
-                    }
-
-                    document.getElementById('stat-total').innerText = empleados.length;
-                    document.getElementById('stat-asis').innerText = asis;
-                    document.getElementById('stat-faltas').innerText = faltas;
-                    document.getElementById('stat-exc').innerText = exc;
-                })
-                .withFailureHandler(function() { 
-                    tbody.innerHTML = '<tr><td colspan="3" class="py-12 text-center text-red-500">Error de red. Intenta nuevamente.</td></tr>'; 
-                })
-                .obtenerTareoHoy();
-        }
-
-        function cambiarEstado(dni, selectElement) {
-            var nuevoEstado = selectElement.value;
-            selectElement.className = "w-full appearance-none outline-none pl-4 pr-10 py-2.5 text-sm font-bold rounded-xl border shadow-sm cursor-pointer transition-all " + getStyleClassForId(nuevoEstado);
-            
-            showToast("Guardando estado en la nube...");
-            google.script.run
-                .withSuccessHandler(function(res) {
-                    if(res.success) {
-                        showToast("Estado Actualizado.");
-                        if(nuevoEstado === 'R' || nuevoEstado === 'AB' || selectElement.parentElement.parentElement.parentElement.classList.contains('grayscale')) {
-                             cargarTareoHoy();
-                        }
-                    }
-                    else showToast("No se pudo guardar.", true);
-                })
-                .withFailureHandler(function() { showToast("Fallo de red al intentar guardar.", true); })
-                .actualizarEstadoManual(dni, nuevoEstado);
-        }
-
-        function cargarReporteMensual() {
-            var tbody = document.getElementById('reporte-tbody');
-            tbody.innerHTML = '<tr><td colspan="5" class="py-16 text-center"><svg viewBox="0 0 280 150" class="h-10 w-auto mx-auto mb-4 animate-pulse grayscale" xmlns="http://www.w3.org/2000/svg"><g stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 32 110 L 32 65 A 34 34 0 0 1 100 65 L 100 110" stroke="#2563EB" stroke-width="32" /><path d="M 100 110 L 100 65 A 34 34 0 0 1 168 65 L 168 110" stroke="#8B5CF6" stroke-width="32" /><path d="M 229 13.2 L 229 53.2 M 209 33.2 L 249 33.2" stroke="#F97316" stroke-width="24" /></g></svg></td></tr>';
-            
-            google.script.run
-                .withSuccessHandler(function(rep) {
-                    isReporteLoaded = true; // SE ACTIVA LA MEMORIA PARA NO RECARGAR OTRA VEZ
-                    tbody.innerHTML = '';
-                    
-                    if(!rep || rep.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="p-16 text-center text-slate-500 font-medium">No hay registros este mes.</td></tr>';
-                        return;
-                    }
-
-                    for(var i=0; i<rep.length; i++) {
-                        var emp = rep[i];
-                        var tr = document.createElement('tr');
-                        tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors";
-                        tr.innerHTML = 
-                            '<td class="py-4 px-6 border-b border-slate-100 dark:border-slate-800/80">' +
-                                '<div class="flex flex-col">' +
-                                    '<span class="font-bold text-slate-900 dark:text-slate-100">' + emp.nombres + '</span>' +
-                                    '<span class="text-[10px] font-mono text-slate-400">DNI: ' + emp.dni + '</span>' +
-                                '</div>' +
-                            '</td>' +
-                            '<td class="py-4 px-6 text-center border-b border-slate-100 dark:border-slate-800/80">' +
-                                '<span class="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-black text-sm">' + emp.asistencias + '</span>' +
-                            '</td>' +
-                            '<td class="py-4 px-6 text-center border-b border-slate-100 dark:border-slate-800/80">' +
-                                '<span class="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-black text-sm">' + emp.faltas + '</span>' +
-                            '</td>' +
-                            '<td class="py-4 px-6 text-center border-b border-slate-100 dark:border-slate-800/80">' +
-                                '<span class="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-purple-50 dark:bg-purple-900/20 text-brand-purple font-black text-sm">' + emp.justificados + '</span>' +
-                            '</td>' +
-                            '<td class="py-4 px-6 text-center border-b border-slate-100 dark:border-slate-800/80">' +
-                                '<span class="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-500 font-black text-sm font-mono tracking-tighter">' + emp.tardanzas + '</span>' +
-                            '</td>';
-                        tbody.appendChild(tr);
-                    }
-                })
-                .withFailureHandler(function() { 
-                    showToast("Error al leer resumen excel.", true); 
-                    tbody.innerHTML = '<tr><td colspan="5" class="p-16 text-center text-red-500 font-medium">Error de red</td></tr>';
-                })
-                .obtenerReporteMensual();
-        }
-
-        var currentAuthPass = ''; 
+        function cambiarEstado(dni, el) { el.className="w-full pl-4 pr-10 py-2.5 text-sm font-bold rounded-xl border outline-none cursor-pointer "+getCls(el.value); showToast("Guardando..."); google.script.run.withSuccessHandler(function(r){if(r.success)showToast("Actualizado");else showToast("Fallo",true);}).actualizarEstadoManual(dni,el.value); }
         
-        var mapInstance = null; 
-        var mapMarker = null;
-        var mapInitialized = false;
+        function cargarReporteMensual(force) {
+            if(!force && isReporteLoaded) return;
+            var tb = document.getElementById('reporte-tbody'); tb.innerHTML = '<tr><td colspan="6" class="py-16 text-center"><svg class="animate-spin h-8 w-8 text-brand-blue mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></td></tr>';
+            google.script.run.withSuccessHandler(function(rep) {
+                isReporteLoaded = true; tb.innerHTML = '';
+                if(!rep||rep.length===0) { tb.innerHTML = '<tr><td colspan="6" class="p-16 text-center text-slate-500">Sin datos.</td></tr>'; return; }
+                rep.forEach(function(e) {
+                    var ms = e.minutosTarde > 0 ? '<span class="bg-red-100 text-red-600 px-3 py-1 rounded-full font-black text-[13px] shadow-sm">' + e.minutosTarde + ' min</span>' : '<span class="text-slate-300">-</span>';
+                    tb.innerHTML += '<tr class="hover:bg-slate-50 transition-colors"><td class="py-4 px-6 border-b border-slate-100 font-bold">' + e.nombres + '<br><span class="text-[10px] font-mono font-normal text-slate-400">' + e.dni + '</span></td><td class="py-4 px-6 text-center border-b border-slate-100 text-green-600 font-black text-lg">' + e.asistencias + '</td><td class="py-4 px-6 text-center border-b border-slate-100 text-red-600 font-black text-lg">' + e.faltas + '</td><td class="py-4 px-6 text-center border-b border-slate-100 text-brand-purple font-black text-lg">' + e.justificados + '</td><td class="py-4 px-6 text-center border-b border-slate-100 text-yellow-600 font-black text-lg">' + e.tardanzas + '</td><td class="py-4 px-6 text-center border-b border-slate-100">' + ms + '</td></tr>';
+                });
+            }).obtenerReporteMensual();
+        }
 
-        function requireAuth() {
-            if (isAuthenticated) switchTab('ajustes');
-            else {
-                var modal = document.getElementById('auth-modal');
-                var content = document.getElementById('auth-content');
-                document.getElementById('auth-pass').value = '';
-                modal.classList.remove('hidden');
-                setTimeout(function() { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
-                document.getElementById('auth-pass').focus();
-            }
-        }
-        
-        function closeAuthModal() {
-            var modal = document.getElementById('auth-modal');
-            var content = document.getElementById('auth-content');
-            modal.classList.add('opacity-0');
-            content.classList.add('scale-95');
-            setTimeout(function() { modal.classList.add('hidden'); }, 200);
-        }
-        
-        function submitAuth() {
-            var pass = document.getElementById('auth-pass').value.trim();
-            if(!pass) return showToast("Ingrese contraseña", true);
-            
-            document.getElementById('loader-text').innerText = "Verificando credenciales...";
-            document.getElementById('loader-overlay').classList.remove('hidden');
-            document.getElementById('loader-overlay').classList.add('flex');
-
-            google.script.run
-                .withSuccessHandler(function(res) {
-                    document.getElementById('loader-overlay').classList.add('hidden');
-                    document.getElementById('loader-overlay').classList.remove('flex');
-                    if(res.success) {
-                        isAuthenticated = true; 
-                        currentAuthPass = pass;
-                        closeAuthModal(); 
-                        switchTab('ajustes');
-                    } else showToast("Contraseña incorrecta", true);
-                })
-                .withFailureHandler(function() { 
-                    document.getElementById('loader-overlay').classList.add('hidden');
-                    document.getElementById('loader-overlay').classList.remove('flex');
-                    showToast("Error de conexión", true); 
-                })
-                .verificarPassword(pass);
-        }
+        /* --- AJUSTES Y MAPA --- */
+        var currentAuthPass = ''; var mapInstance=null; var mapMarker=null; var mapInitialized=false;
+        function requireAuth() { if(isAuthenticated) switchTab('ajustes'); else { document.getElementById('auth-pass').value=''; document.getElementById('auth-modal').classList.remove('hidden'); setTimeout(function(){document.getElementById('auth-modal').classList.remove('opacity-0'); document.getElementById('auth-content').classList.remove('scale-95');},10); } }
+        function closeAuthModal() { document.getElementById('auth-modal').classList.add('opacity-0'); document.getElementById('auth-content').classList.add('scale-95'); setTimeout(function(){document.getElementById('auth-modal').classList.add('hidden');},200); }
+        function submitAuth() { var p=document.getElementById('auth-pass').value.trim(); if(!p) return showToast("Ingrese clave",true); showModal("Procesando","Verificando...",true); google.script.run.withSuccessHandler(function(r){closeModal(); if(r.success){isAuthenticated=true; currentAuthPass=p; closeAuthModal(); switchTab('ajustes');} else showToast("Clave incorrecta",true); }).verificarPassword(p); }
         
         function cargarConfiguracion() {
-            google.script.run
-                .withSuccessHandler(function(data) {
-                    isConfigLoaded = true; // SE ACTIVA LA MEMORIA PARA NO RECARGAR OTRA VEZ
-                    var horaStr = data.horaIngreso;
-                    if (horaStr && horaStr instanceof Date) {
-                        var hh = String(horaStr.getHours()).padStart(2, '0');
-                        var mm = String(horaStr.getMinutes()).padStart(2, '0');
-                        horaStr = hh + ':' + mm;
-                    } else if (horaStr && typeof horaStr === 'string' && horaStr.length > 5) {
-                        horaStr = horaStr.substring(0, 5);
-                    }
-                    
-                    document.getElementById('conf-hora').value = horaStr || "09:00";
-                    document.getElementById('conf-tolerancia').value = data.tolerancia || 10;
-                    document.getElementById('conf-pass').value = ""; 
-                    document.getElementById('conf-radio').value = data.radio || 15;
-                    
-                    var lat = parseFloat(data.latitud) || -12.046374;
-                    var lng = parseFloat(data.longitud) || -77.042793;
-                    
-                    document.getElementById('conf-lat').value = lat.toFixed(6);
-                    document.getElementById('conf-lng').value = lng.toFixed(6);
-
-                    initMap(lat, lng);
-                })
-                .withFailureHandler(function(err) {
-                    showToast("Error al cargar configuración", true);
-                })
-                .getConfig();
+            google.script.run.withSuccessHandler(function(d){
+                var h = d.horaIngreso; if(h && typeof h==='string' && h.length>5) h=h.substring(0,5);
+                document.getElementById('conf-hora').value = h||"09:00"; document.getElementById('conf-tolerancia').value = d.tolerancia||10;
+                document.getElementById('conf-empresa').value = d.nombreEmpresa || "MAS Digital";
+                document.getElementById('conf-pass').value = ""; document.getElementById('conf-radio').value = d.radio||15;
+                var lat=parseFloat(d.latitud)|| -12.046374; var lng=parseFloat(d.longitud)|| -77.042793;
+                document.getElementById('conf-lat').value = lat.toFixed(6); document.getElementById('conf-lng').value = lng.toFixed(6);
+                initMap(lat,lng);
+            }).getConfig();
         }
+        function initMap(lat,lng) { if(typeof L==='undefined') return; setTimeout(function(){ if(!mapInitialized) { mapInstance=L.map('map-container').setView([lat,lng],17); L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}).addTo(mapInstance); mapMarker=L.marker([lat,lng],{draggable:true}).addTo(mapInstance); mapMarker.on('dragend',function(){var p=mapMarker.getLatLng(); document.getElementById('conf-lat').value=p.lat.toFixed(6); document.getElementById('conf-lng').value=p.lng.toFixed(6);}); mapInstance.on('click',function(e){mapMarker.setLatLng(e.latlng); document.getElementById('conf-lat').value=e.latlng.lat.toFixed(6); document.getElementById('conf-lng').value=e.latlng.lng.toFixed(6);}); mapInitialized=true; mapInstance.invalidateSize(); } else { mapInstance.setView([lat,lng],17); mapMarker.setLatLng([lat,lng]); mapInstance.invalidateSize(); } },300); }
+        function centrarEnMiUbicacion() { showModal("GPS","Ubicando...",true); if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(pos){closeModal(); var lat=pos.coords.latitude; var lng=pos.coords.longitude; document.getElementById('conf-lat').value=lat.toFixed(6); document.getElementById('conf-lng').value=lng.toFixed(6); if(mapInitialized){mapInstance.setView([lat,lng],17); mapMarker.setLatLng([lat,lng]); mapInstance.invalidateSize();}else initMap(lat,lng);},function(){closeModal(); showToast("GPS denegado",true);},{enableHighAccuracy:true});} }
+        function guardarConfiguracion() { var pass=document.getElementById('conf-pass').value.trim(); var data={horaIngreso:document.getElementById('conf-hora').value, tolerancia:parseInt(document.getElementById('conf-tolerancia').value)||0, nombreEmpresa:document.getElementById('conf-empresa').value.trim(), password:pass, latitud:parseFloat(document.getElementById('conf-lat').value)|| -12.04, longitud:parseFloat(document.getElementById('conf-lng').value)|| -77.04, radio:parseInt(document.getElementById('conf-radio').value)||15}; showModal("Guardando","Aplicando...",true); google.script.run.withSuccessHandler(function(r){closeModal(); if(r.success){showToast("Guardado"); if(pass) currentAuthPass=pass; document.getElementById('conf-pass').value="";}else showToast(r.message,true);}).saveConfig(currentAuthPass,data); }
 
-        function initMap(lat, lng) {
-            if (typeof L === 'undefined') {
-                showToast("La librería del mapa no cargó correctamente.", true);
-                return;
-            }
-
-            setTimeout(function() {
-                if (!mapInitialized) {
-                    mapInstance = L.map('map-container').setView([lat, lng], 17);
-                    
-                    L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
-                        maxZoom: 20,
-                        subdomains:['mt0','mt1','mt2','mt3'],
-                        attribution: 'Map data © Google'
-                    }).addTo(mapInstance);
-                    
-                    mapMarker = L.marker([lat, lng], {draggable: true}).addTo(mapInstance);
-                    
-                    mapMarker.on('dragend', function (e) {
-                        var pos = mapMarker.getLatLng();
-                        document.getElementById('conf-lat').value = pos.lat.toFixed(6);
-                        document.getElementById('conf-lng').value = pos.lng.toFixed(6);
-                    });
-                    
-                    mapInstance.on('click', function(e) {
-                        mapMarker.setLatLng(e.latlng);
-                        document.getElementById('conf-lat').value = e.latlng.lat.toFixed(6);
-                        document.getElementById('conf-lng').value = e.latlng.lng.toFixed(6);
-                    });
-                    
-                    mapInitialized = true;
-                    mapInstance.invalidateSize();
-                } else if (mapInstance && mapMarker) {
-                    mapInstance.setView([lat, lng], 17);
-                    mapMarker.setLatLng([lat, lng]);
-                    mapInstance.invalidateSize();
-                }
-            }, 300); 
-        }
-
-        function centrarEnMiUbicacion() {
-            document.getElementById('loader-text').innerText = "Obteniendo ubicación...";
-            document.getElementById('loader-overlay').classList.remove('hidden');
-            document.getElementById('loader-overlay').classList.add('flex');
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    document.getElementById('loader-overlay').classList.add('hidden');
-                    document.getElementById('loader-overlay').classList.remove('flex');
-
-                    var lat = position.coords.latitude;
-                    var lng = position.coords.longitude;
-                    
-                    document.getElementById('conf-lat').value = lat.toFixed(6);
-                    document.getElementById('conf-lng').value = lng.toFixed(6);
-                    
-                    if(mapInitialized && mapInstance && mapMarker) {
-                        mapInstance.setView([lat, lng], 17);
-                        mapMarker.setLatLng([lat, lng]);
-                        mapInstance.invalidateSize();
-                    } else {
-                        initMap(lat, lng);
-                    }
-                    showToast("Ubicación actualizada en el mapa");
-                }, function(error) {
-                    document.getElementById('loader-overlay').classList.add('hidden');
-                    document.getElementById('loader-overlay').classList.remove('flex');
-                    showToast("Permiso de ubicación denegado o no disponible.", true);
-                }, { enableHighAccuracy: true });
-            } else {
-                document.getElementById('loader-overlay').classList.add('hidden');
-                document.getElementById('loader-overlay').classList.remove('flex');
-                showToast("Tu navegador no soporta geolocalización.", true);
-            }
-        }
-        
-        function guardarConfiguracion() {
-            var nuevaPass = document.getElementById('conf-pass').value.trim();
-            var latStr = document.getElementById('conf-lat').value;
-            var lngStr = document.getElementById('conf-lng').value;
-            
-            var lat = parseFloat(latStr);
-            var lng = parseFloat(lngStr);
-
-            var data = {
-                horaIngreso: document.getElementById('conf-hora').value,
-                tolerancia: parseInt(document.getElementById('conf-tolerancia').value) || 0,
-                password: nuevaPass,
-                latitud: isNaN(lat) ? -12.046374 : lat,
-                longitud: isNaN(lng) ? -77.042793 : lng,
-                radio: parseInt(document.getElementById('conf-radio').value) || 15
-            };
-            
-            document.getElementById('loader-text').innerText = "Aplicando cambios...";
-            document.getElementById('loader-overlay').classList.remove('hidden');
-            document.getElementById('loader-overlay').classList.add('flex');
-
-            google.script.run
-                .withSuccessHandler(function(res) {
-                    document.getElementById('loader-overlay').classList.add('hidden');
-                    document.getElementById('loader-overlay').classList.remove('flex');
-                    if(res.success) {
-                        showToast("Ajustes guardados correctamente");
-                        if (nuevaPass !== "") currentAuthPass = nuevaPass; 
-                        document.getElementById('conf-pass').value = ""; 
-                    } else showToast(res.message, true);
-                })
-                .withFailureHandler(function() { 
-                    document.getElementById('loader-overlay').classList.add('hidden');
-                    document.getElementById('loader-overlay').classList.remove('flex');
-                    showToast("Fallo de red", true); 
-                })
-                .saveConfig(currentAuthPass, data); 
-        }
-
-        window.onload = function() {
-            verificarAcceso(function() {
-                switchTab('escaner');
-            });
-        };
+        window.onload = function() { verificarAcceso(function() { switchTab('escaner'); }); };
     </script>
 </body>
 </html>
